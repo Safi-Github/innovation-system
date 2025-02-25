@@ -20,4 +20,7 @@ It enables innovators to submit their innovation requests online. These requests
 - **Database:** PostgreSQL
 - **Frontend:** Next Js
 - **API:** RESTful API
+<<<<<<< HEAD
 
+=======
+>>>>>>> master
