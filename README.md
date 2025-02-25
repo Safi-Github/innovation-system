@@ -1,23 +1,22 @@
-# 🚀 Full-Stack Application  
+# Innovation Registration System
 
-## 📌 Overview  
-📌 This Full-Stack Application is built with **Spring Boot & React** and secured using **Spring Security & JWT**. It provides **role-based access control**, a **RESTful API**, and a modern frontend with protected routes.  
+## 📌 Overview
 
-## ✨ Features  
-- 🔐 **User Authentication & Authorization** using Spring Security & JWT  
-- 🔄 **RESTful API** for smooth interaction between frontend and backend  
-- 🛂 **Role-Based Access Control (RBAC)** for users and admins  
-- 📊 **Spring JPA & Hibernate** for database operations  
-- 🛡️ **Secure API endpoints & protected frontend routes**  
+The **Innovation Registration System** is a web-based platform designed for the Research Directorate of the MCIT Ministry.
+It enables innovators to submit their innovation requests online. These requests are then reviewed by responsible board members and administrators, who can either **approve** or **reject** them.
 
-## 🛠️ Technologies  
+## 🚀 Features
 
-### 🔹 Backend  
-- **Spring Boot** – Framework for building scalable applications  
-- **Spring Security & JWT** – Secure authentication & authorization  
-- **PostgreSQL** – Database for persistent storage  
+- **User Authentication & Authorization** using **Spring Security & JWT**
+- **RESTful API** for smooth interaction between frontend and backend
+- **Role-based Access Control (RBAC)** for innovators, board members, and admins
+- **Spring JPA & Hibernate** for database operations
+- **Secure request submission & tracking** for innovators
+- **Approval/Rejection workflow** for board members & admin
 
-### 🔹 Frontend  
-- **React** – Modern UI library for an interactive experience  
-- **React Router** – Handles private and public routes  
-- **Axios** – HTTP client for API communication  
+## 🛠️ Tech Stack
+
+- **Backend:** Java, Spring Boot, Spring Security, JWT, Spring JPA, Hibernate
+- **Database:** PostgreSQL
+- **Frontend:** Next Js
+- **API:** RESTful API
