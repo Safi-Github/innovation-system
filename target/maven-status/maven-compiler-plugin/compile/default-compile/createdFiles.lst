@@ -1,0 +1,7 @@
+com\mcit\innovation_management_system\user\User.class
+com\mcit\innovation_management_system\innovation\InnovationRepository.class
+com\mcit\innovation_management_system\InnovationManagementSystemApplication.class
+com\mcit\innovation_management_system\innovation\InnovationController.class
+com\mcit\innovation_management_system\user\Enum\LiteracyLevel.class
+com\mcit\innovation_management_system\innovation\Innovation.class
+com\mcit\innovation_management_system\user\Enum\Role.class
