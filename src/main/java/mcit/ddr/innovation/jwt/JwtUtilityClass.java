@@ -3,6 +3,8 @@ package mcit.ddr.innovation.jwt;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -11,8 +13,10 @@ import java.time.Instant;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 public class JwtUtilityClass {
@@ -24,6 +28,12 @@ public class JwtUtilityClass {
         Map<String, Object> claims = new HashMap<>(); // Fix: Map<String, Object> instead of String
         claims.put("iss", "https://secure.safi.com");
         claims.put("firstname", "safiullah");
+        // ✅ Add roles to JWT
+        List<String> roles = userDetails.getAuthorities()
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+        claims.put("roles", roles);
 
         return Jwts.builder()
                 .setClaims(claims)  // Fix: Use setClaims instead of claims()
@@ -37,6 +47,12 @@ public class JwtUtilityClass {
     private SecretKey generateKey() {
         byte[] decodedKey = Base64.getDecoder().decode(SECRET);
         return Keys.hmacShaKeyFor(decodedKey);
+    }
+
+    // ✅ Extract user roles from JWT
+    public List<String> extractRoles(String jwt) {
+        Claims claims = getClaims(jwt);
+        return claims.get("roles", List.class); // Retrieve roles as a list
     }
 
     public String extractUsername(String jwt) {

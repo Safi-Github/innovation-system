@@ -7,6 +7,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,7 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import lombok.extern.slf4j.Slf4j;
 import mcit.ddr.innovation.entity.MyUser;
 import mcit.ddr.innovation.jwt.JwtUtilityClass;
@@ -85,11 +89,15 @@ public ResponseEntity<?> authenticateAndGetToken(@RequestBody LoginForm loginFor
 
         //generate token
         if (authentication.isAuthenticated()) {
-          log.info("This is an INFO level log message");
-            String token = jwtUtilityClass.generateToken(
-                myUserDetailService.loadUserByUsername(loginForm.username())
-            );
-            return ResponseEntity.ok(token);
+          UserDetails userDetails = myUserDetailService.loadUserByUsername(loginForm.username());
+            String token = jwtUtilityClass.generateToken(userDetails);
+
+            List<String> roles = jwtUtilityClass.extractRoles(token);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("token", token);
+            response.put("roles", roles);
+            return ResponseEntity.ok(response);
         }
     } catch (BadCredentialsException e) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
