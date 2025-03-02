@@ -22,18 +22,18 @@ import java.util.stream.Collectors;
 public class JwtUtilityClass {
 
     private static final String SECRET = "YCfSGDFu+xkCpm8iDAhkJy6VrtaFJE9X1uC5kkA9YVcfN0ARhcuMAeAsMpaLotYYx32HwDSAm7BEqOtpnUOHRA==";
-    private static final long VALIDITY = TimeUnit.MINUTES.toMillis(30);
+    private static final long VALIDITY = TimeUnit.HOURS.toMillis(48);
 
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>(); // Fix: Map<String, Object> instead of String
         claims.put("iss", "https://secure.safi.com");
         claims.put("firstname", "safiullah");
         // ✅ Add roles to JWT
-        List<String> roles = userDetails.getAuthorities()
-                .stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
-        claims.put("roles", roles);
+        // List<String> roles = userDetails.getAuthorities()
+        //         .stream()
+        //         .map(GrantedAuthority::getAuthority)
+        //         .collect(Collectors.toList());
+        // claims.put("roles", roles);
 
         return Jwts.builder()
                 .setClaims(claims)  // Fix: Use setClaims instead of claims()

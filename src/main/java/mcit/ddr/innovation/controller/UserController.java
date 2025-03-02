@@ -67,21 +67,6 @@ public class UserController {
      return ResponseEntity.ok()
             .body(updatedUser);
     }
-
-    //activate or de-activate user
-    @PutMapping("/user/{id}/toggle-active")
-    public ResponseEntity<MyUser> toggleUserActive(@PathVariable Long id) {
-        Optional<MyUser> existingUser = myUserRepository.findById(id);
-        if (existingUser.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-    
-        MyUser user = existingUser.get();
-        user.setIsActive(!user.getIsActive()); // Toggle isActive status
-        MyUser updatedUser = myUserRepository.save(user);
-    
-        return ResponseEntity.ok(updatedUser);
-   }
   //
   @DeleteMapping("/users/{id}")
   public ResponseEntity<Void> deleteUser(@PathVariable Long id) {

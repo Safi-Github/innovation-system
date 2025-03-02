@@ -1,61 +1,39 @@
-package mcit.ddr.innovation.entity;
+package mcit.ddr.innovation.dto;
 
-import java.util.Collections;
 import java.util.List;
 
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-
-import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import mcit.ddr.innovation.enums.LiteracyLevel;
 import mcit.ddr.innovation.enums.Role;
 
-@Entity
-@Table(name = "users")
-public class MyUser {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class AdminUserDTO {
     private Long id;
-
-    @NotBlank
     private String firstname;
-
-    @NotBlank
     private String lastname;
-
-    @NotBlank
     private String fathername;
-
-    @Column(unique = true, nullable = false)
     private String nid;
-
-    @NotBlank
     private String phone;
-
-    @Enumerated(EnumType.STRING)
     private LiteracyLevel literacyLevel;
-
-    @Email
-    @Column(unique = true, nullable = false)
     private String email;
-
-    @NotBlank
-    @Column(unique = true, nullable = false)
     private String username;
-
-    @NotBlank
-    private String password;
-
-    @Enumerated(EnumType.STRING)
     private Role role;
 
-    @Column(columnDefinition = "boolean default true")
-    private Boolean isActive = true;
+    // Constructor
+    public AdminUserDTO(Long id, String firstname, String lastname, String fathername, String nid,
+                        String phone, LiteracyLevel literacyLevel, String email, String username,
+                        Role role)
+        {
+        this.id = id;
+        this.firstname = firstname;
+        this.lastname = lastname;
+        this.fathername = fathername;
+        this.nid = nid;
+        this.phone = phone;
+        this.literacyLevel = literacyLevel;
+        this.email = email;
+        this.username = username;
+        this.role = role;
+    }
+
 
     // Getters and Setters
     public Long getId() {
@@ -130,27 +108,11 @@ public class MyUser {
         this.username = username;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public Role getRole() {
         return role;
     }
 
     public void setRole(Role role) {
         this.role = role;
-    }
-
-    public Boolean getIsActive() {
-        return isActive;
-    }
-
-    public void setIsActive(Boolean isActive) {
-        this.isActive = isActive;
     }
 }
