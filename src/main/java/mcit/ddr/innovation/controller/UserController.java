@@ -2,17 +2,20 @@ package mcit.ddr.innovation.controller;
 
 import org.apache.tomcat.util.http.HeaderUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.ReflectionUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -51,22 +54,48 @@ public class UserController {
       return myUserRepository.findById(id);
   }
 
-  @PutMapping("/user/{id}")
-  public ResponseEntity<MyUser> updateUser(@PathVariable Long id, @RequestBody MyUser userDetails) {
-     Optional<MyUser> existingUser = myUserRepository.findById(id);
-     if (existingUser.isEmpty()) {
+    //  update user 
+//   @PutMapping("/user/{id}")
+//   public ResponseEntity<MyUser> updateUser(@PathVariable Long id, @RequestBody MyUser userDetails) {
+//      Optional<MyUser> existingUser = myUserRepository.findById(id);
+//      if (existingUser.isEmpty()) {
+//         return ResponseEntity.notFound().build();
+//      }
+
+//      MyUser user = existingUser.get();
+//      user.setUsername(userDetails.getUsername());
+//      user.setRole(userDetails.getRole()); // Adjust according to your entity fields
+
+//      MyUser updatedUser = myUserRepository.save(user);
+
+//      return ResponseEntity.ok()
+//             .body(updatedUser);
+//     }
+
+//partial update
+@PatchMapping("/user/{id}")
+public ResponseEntity<MyUser> updateUser(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
+    Optional<MyUser> existingUser = myUserRepository.findById(id);
+    
+    if (existingUser.isEmpty()) {
         return ResponseEntity.notFound().build();
-     }
-
-     MyUser user = existingUser.get();
-     user.setUsername(userDetails.getUsername());
-     user.setRole(userDetails.getRole()); // Adjust according to your entity fields
-
-     MyUser updatedUser = myUserRepository.save(user);
-
-     return ResponseEntity.ok()
-            .body(updatedUser);
     }
+
+    MyUser user = existingUser.get();
+
+    updates.forEach((field, value) -> {
+        Field userField = org.springframework.util.ReflectionUtils.findField(MyUser.class, field);
+        if (userField != null) {
+            userField.setAccessible(true);
+            ReflectionUtils.setField(userField, user, value);
+        }
+    });
+
+    MyUser updatedUser = myUserRepository.save(user);
+
+    return ResponseEntity.ok(updatedUser);
+}
+
   //
   @DeleteMapping("/users/{id}")
   public ResponseEntity<Void> deleteUser(@PathVariable Long id) {

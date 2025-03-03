@@ -7,6 +7,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -49,6 +51,7 @@ public class MyUser {
     private String username;
 
     @NotBlank
+    @JsonIgnore //This will prevent `password` from appearing in JSON responses
     private String password;
 
     @Enumerated(EnumType.STRING)
@@ -129,7 +132,7 @@ public class MyUser {
     public void setUsername(String username) {
         this.username = username;
     }
-
+    @JsonIgnore 
     public String getPassword() {
         return password;
     }
