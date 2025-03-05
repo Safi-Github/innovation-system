@@ -2,11 +2,14 @@ package mcit.ddr.innovation.controller;
 
 import org.apache.tomcat.util.http.HeaderUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.util.ReflectionUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -72,42 +75,81 @@ public class UserController {
 //             .body(updatedUser);
 //     }
 
-//partial update
-@PatchMapping("/user/{id}")
-public ResponseEntity<MyUser> updateUser(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
-    Optional<MyUser> existingUser = myUserRepository.findById(id);
+    //partial update
+    // @PatchMapping("/user/{id}")
+    // public ResponseEntity<MyUser> updateUser(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
+    //     Optional<MyUser> existingUser = myUserRepository.findById(id);
     
-    if (existingUser.isEmpty()) {
-        return ResponseEntity.notFound().build();
-    }
+    //     if (existingUser.isEmpty()) {
+    //         return ResponseEntity.notFound().build();
+    //     }
 
-    MyUser user = existingUser.get();
+    //     MyUser user = existingUser.get();
 
-    updates.forEach((field, value) -> {
-        Field userField = org.springframework.util.ReflectionUtils.findField(MyUser.class, field);
-        if (userField != null) {
-            userField.setAccessible(true);
-            ReflectionUtils.setField(userField, user, value);
+    //     updates.forEach((field, value) -> {
+    //         Field userField = org.springframework.util.ReflectionUtils.findField(MyUser.class, field);
+    //         if (userField != null) {
+    //             userField.setAccessible(true);
+    //             ReflectionUtils.setField(userField, user, value);
+    //         }
+    //     });
+
+    //     MyUser updatedUser = myUserRepository.save(user);
+
+    //     return ResponseEntity.ok(updatedUser);
+    // }
+
+    //partial update
+    @PatchMapping("/user/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
+        Optional<MyUser> existingUserOpt = myUserRepository.findById(id);
+
+        if (existingUserOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "User not found", "message", "No user found with id: " + id));
         }
-    });
 
-    MyUser updatedUser = myUserRepository.save(user);
+        MyUser user = existingUserOpt.get();
 
-    return ResponseEntity.ok(updatedUser);
-}
+        updates.forEach((field, value) -> {
+            Field userField = org.springframework.util.ReflectionUtils.findField(MyUser.class, field);
+            if (userField != null) {
+                userField.setAccessible(true);
 
-  //
-  @DeleteMapping("/users/{id}")
-  public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-    if (!myUserRepository.existsById(id)) {
-        return ResponseEntity.notFound().build();
+                // Prevent updating ID and password directly
+                if (field.equalsIgnoreCase("id")) {
+                    throw new IllegalArgumentException("Updating ID is not allowed");
+                } else if (field.equalsIgnoreCase("password")) {
+                    throw new IllegalArgumentException("Use the change password endpoint to update the password");
+                }
+
+                // Convert username and email to lowercase before saving
+                if (field.equalsIgnoreCase("username") || field.equalsIgnoreCase("email")) {
+                    value = value.toString().toLowerCase();
+                }
+
+                ReflectionUtils.setField(userField, user, value);
+            }
+        });
+
+        // Save the updated user
+        myUserRepository.save(user);
+    
+        return ResponseEntity.ok(user);
     }
-    myUserRepository.deleteById(id);
 
-    return ResponseEntity
+
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        if (!myUserRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        myUserRepository.deleteById(id);
+
+        return ResponseEntity
             .noContent()
             .build();
-  }
+    }
 
     @GetMapping("/enums/literacy-levels")
     public ResponseEntity<List<Map<String, String>>> getLiteracyLevels() {

@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -56,10 +57,30 @@ public class AccountController {
         this.myUserRepository = myUserRepository;
     }
 
+    // @PostMapping("/register")
+    // public MyUser createUser(@RequestBody MyUser user) {
+    //     user.setPassword(passwordEncoder.encode(user.getPassword()));
+    //     return myUserRepository.save(user);
+    // }
+
     @PostMapping("/register")
-    public MyUser createUser(@RequestBody MyUser user) {
+    public ResponseEntity<?> createUser(@RequestBody MyUser user) {
+        // Check for existing user and email
+        if (myUserRepository.existsByUsername(user.getUsername().toLowerCase())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", "Username already taken", "message", "Please choose another username."));
+        }
+        if (myUserRepository.existsByEmail(user.getEmail().toLowerCase())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", "Email already taken", "message", "Please choose another Email."));
+        }
+        // Set values and save user
+        user.setUsername(user.getUsername().toLowerCase());
+        user.setEmail(user.getEmail().toLowerCase());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return myUserRepository.save(user);
+
+        MyUser savedUser = myUserRepository.save(user);
+            return ResponseEntity.ok(savedUser);
     }
 
     @PostMapping("/authenticate")
