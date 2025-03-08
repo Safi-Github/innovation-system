@@ -52,7 +52,7 @@ public class SecurityConfiguration {
                     registry.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll();
                     registry.requestMatchers("/api/users/**").hasAuthority("ROLE_ADMIN");
                     registry.requestMatchers(HttpMethod.GET, "/api/user/{id}").hasAuthority( "ROLE_ADMIN");  
-                    registry.requestMatchers(HttpMethod.PUT, "/api/user/{id}").hasAuthority("ROLE_ADMIN"); 
+                    registry.requestMatchers(HttpMethod.PUT, "/api/user/{id}").hasAuthority("ROLE_ADMIN");  
                     registry.anyRequest().authenticated();
                 })
                 

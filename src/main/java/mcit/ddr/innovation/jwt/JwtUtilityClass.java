@@ -26,14 +26,13 @@ public class JwtUtilityClass {
 
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>(); // Fix: Map<String, Object> instead of String
-        claims.put("iss", "https://secure.safi.com");
-        claims.put("firstname", "safiullah");
+        claims.put("iss", "https://secure.ddr.com");
         // ✅ Add roles to JWT
-        // List<String> roles = userDetails.getAuthorities()
-        //         .stream()
-        //         .map(GrantedAuthority::getAuthority)
-        //         .collect(Collectors.toList());
-        // claims.put("roles", roles);
+        List<String> roles = userDetails.getAuthorities()
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+        claims.put("roles", roles);
 
         return Jwts.builder()
                 .setClaims(claims)  // Fix: Use setClaims instead of claims()
