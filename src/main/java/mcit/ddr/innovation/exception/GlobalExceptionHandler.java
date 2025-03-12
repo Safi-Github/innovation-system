@@ -90,6 +90,13 @@ public class GlobalExceptionHandler {
                 .body(Map.of("error", "Invalid update operation", "message", ex.getMessage()));
     }
 
+    // 🔹 Handle entity not found exceptions (returns 404)
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleResourceNotFoundException(ResourceNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body(Map.of("error", "Resource Not Found", "message", ex.getMessage()));
+    }
+
     // 🔹 Handle generic exceptions
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleGenericException(Exception e) {

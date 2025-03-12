@@ -50,6 +50,8 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(registry -> {
                     registry.requestMatchers("/home", "/api/register/**", "/api/authenticate").permitAll();
                     registry.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll();
+                    // registry.requestMatchers(HttpMethod.OPTIONS, "/api/user/{id}").hasAuthority("ROLE_ADMIN");
+
                     registry.requestMatchers("/api/users/**").hasAuthority("ROLE_ADMIN");
                     registry.requestMatchers(HttpMethod.GET, "/api/user/{id}").hasAuthority( "ROLE_ADMIN");  
                     registry.requestMatchers(HttpMethod.PUT, "/api/user/{id}").hasAuthority("ROLE_ADMIN");  
@@ -67,7 +69,7 @@ public class SecurityConfiguration {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:3000")); // Allow frontend
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT","PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 

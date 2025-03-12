@@ -1,60 +1,79 @@
 package mcit.ddr.innovation.entity;
 
-import java.util.Collections;
-import java.util.List;
-
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import lombok.Data;
+import mcit.ddr.innovation.enums.Category;
 import mcit.ddr.innovation.enums.InnovStatus;
-import mcit.ddr.innovation.enums.LiteracyLevel;
-import mcit.ddr.innovation.enums.Role;
+import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.annotation.CreatedBy;
+import org.w3c.dom.Text;
+
+import java.util.Date;
 
 @Entity
-@Table(name = "innovation")
+@Data
 public class Innovation {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
-    private String tittle;
+  
+    private String title;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    private String purpose;
 
     @Enumerated(EnumType.STRING)
-    private InnovStatus innovStatus;
+    private Category category;
 
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
+    @Column(columnDefinition = "TEXT")
+    private String additionalInfo;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @Enumerated(EnumType.STRING)
+    private InnovStatus status;
 
-    public String getTittle() {
-        return tittle;
-    }
+    @Column(columnDefinition = "TEXT")
+    private String reasonsProvingYouCanInvent;
 
-    public void setTittle(String tittle) {
-        this.tittle = tittle;
-    }
+    private String impact;
 
-    public InnovStatus getInnovStatus() {
-        return innovStatus;
-    }
+    @Column(columnDefinition = "TEXT")
+    private String resourcesNeeded;
 
-    public void setInnovStatus(InnovStatus innovStatus) {
-        this.innovStatus = innovStatus;
-    }
+    private String attachment;
 
+    @Column(name = "CREATE_DATE", updatable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    @JsonFormat(pattern = "yyyy/MM/dd")
+    @CreationTimestamp
+    @JsonIgnore
+    private Date createDate;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date lastModifiedDate;
+
+    private Boolean isAssigned;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date assignedDate;
+
+    @ManyToOne
+    @JoinColumn(name = "assigner_id")
+    private MyUser assigner;
+
+    @ManyToOne
+    @JoinColumn(name = "board_member_id")
+    private MyUser boardMember;
+
+    // Audit fields
+    @JsonIgnore
+    @CreatedBy
+    @ManyToOne
+    @JoinColumn(name = "created_by", updatable = false)
+    private MyUser createdBy;
 }
