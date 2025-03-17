@@ -12,7 +12,7 @@ import mcit.ddr.innovation.enums.InnovStatus;
 import mcit.ddr.innovation.repository.InnovationRepository;
 import mcit.ddr.innovation.repository.MyUserRepository;
 import mcit.ddr.innovation.repository.ReviewRepository;
-
+import mcit.ddr.innovation.service.FileStorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.Date;
@@ -37,8 +38,9 @@ public class InnovationService {
     // private final NotificationService notificationService;
     private final MyUserRepository myUserRepository;
     private final ReviewRepository reviewRepository;
+    private final FileStorageService fileStorageService;
 
-    public Innovation createInnovation(Innovation innovation) {
+    public Innovation createInnovation(Innovation innovation, MultipartFile attachmentFile) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
         MyUser currentUser = myUserRepository.findByUsername(username)
@@ -50,6 +52,10 @@ public class InnovationService {
         innovation.setStatus(InnovStatus.DRAFT);
         innovation.setCreatedBy(currentUser);
 
+        if (attachmentFile != null && !attachmentFile.isEmpty()) {
+            String filePath = fileStorageService.saveFile(attachmentFile);
+            innovation.setAttachment(filePath); // Set file path to bill object
+        }
         return innovationRepository.save(innovation);
     }
 
