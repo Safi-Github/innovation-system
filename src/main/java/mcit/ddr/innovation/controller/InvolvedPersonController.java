@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("api/involved-person")
@@ -19,6 +20,13 @@ public class InvolvedPersonController {
     public ResponseEntity<InvolvedPerson> addInvolvedPerson(@PathVariable Long innovationId,
                                                             @RequestBody InvolvedPerson involvedPerson) {
         return ResponseEntity.ok(involvedPersonService.addInvolvedPerson(innovationId, involvedPerson));
+    }
+
+    // update & partial updated of involved person
+    @PatchMapping("/{id}")
+    public ResponseEntity<InvolvedPerson> updateInvolvedPerson(@PathVariable Long id,
+                                                               @RequestBody Map<String, Object> updates) {
+        return ResponseEntity.ok(involvedPersonService.updateInvolvedPerson(id, updates));
     }
 
     @GetMapping("/{innovationId}")

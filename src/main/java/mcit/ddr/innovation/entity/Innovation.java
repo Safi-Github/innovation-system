@@ -71,7 +71,6 @@ public class Innovation {
     private MyUser boardMember;
 
     // Audit fields
-    @JsonIgnore
     @CreatedBy
     @ManyToOne
     @JoinColumn(name = "created_by", updatable = false)

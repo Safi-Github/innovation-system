@@ -1,6 +1,7 @@
 package mcit.ddr.innovation.controller;
 
 import mcit.ddr.innovation.dto.InnovationDTO;
+import mcit.ddr.innovation.dto.PartialInnovationUpdateDTO;
 import mcit.ddr.innovation.entity.Innovation;
 import mcit.ddr.innovation.entity.MyUser;
 import mcit.ddr.innovation.entity.Review;
@@ -83,6 +84,33 @@ public class InnovationController {
         }
         Innovation createdInnovation = innovationService.createInnovation(innovation,attachmentFile);
         return ResponseEntity.ok(createdInnovation);
+    }
+
+    // partial innovation update endpoint
+    @PatchMapping(path = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> partialUpdateInnovation(
+            @PathVariable Long id,
+            @RequestPart("innovation") PartialInnovationUpdateDTO partialUpdateDTO,
+            @RequestPart(value = "attachmentFile", required = false) MultipartFile attachmentFile) {
+        // Validate file type before saving innovation
+        if (attachmentFile != null && !attachmentFile.isEmpty()) {
+            String originalFileName = attachmentFile.getOriginalFilename();
+            long fileSize = attachmentFile.getSize();
+            long maxSize = 3 * 1024 * 1024; // 3 MB in bytes
+
+            // Ensure the file has a .pdf extension (case insensitive)
+            if (originalFileName != null && !originalFileName.toLowerCase().endsWith(".pdf")) {
+                throw new FileValidationException("Only PDF files are allowed!");
+            }
+            // Ensure the file size is less than 3MB
+            if (fileSize > maxSize) {
+                throw new FileValidationException("File size must be less than 3MB!");
+            }
+        }
+
+        // Call the service method to perform the partial update, including handling file upload
+        Innovation updatedInnovation = innovationService.partialUpdateInnovation(id, partialUpdateDTO, attachmentFile);
+        return ResponseEntity.ok(updatedInnovation);
     }
 
     

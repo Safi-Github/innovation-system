@@ -2,9 +2,11 @@ package mcit.ddr.innovation.service;
 
 import lombok.RequiredArgsConstructor;
 import mcit.ddr.innovation.dto.InnovationDTO;
+import mcit.ddr.innovation.dto.PartialInnovationUpdateDTO;
 import mcit.ddr.innovation.entity.Innovation;
 import mcit.ddr.innovation.entity.MyUser;
 import mcit.ddr.innovation.entity.Review;
+import mcit.ddr.innovation.enums.Category;
 import mcit.ddr.innovation.enums.InnovStatus;
 import mcit.ddr.innovation.enums.Role;
 import mcit.ddr.innovation.exception.ResourceNotFoundException;
@@ -56,6 +58,47 @@ public class InnovationService {
             String filePath = fileStorageService.saveFile(attachmentFile);
             innovation.setAttachment(filePath); // Set file path to bill object
         }
+        return innovationRepository.save(innovation);
+    }
+
+    // partial update the innovation
+    public Innovation partialUpdateInnovation(Long innovationId, PartialInnovationUpdateDTO partialUpdateDTO, MultipartFile attachmentFile) {
+        Innovation innovation = innovationRepository.findById(innovationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Innovation not found"));
+
+        // Update only the fields present in the DTO, excluding status
+        if (partialUpdateDTO.getTitle() != null) {
+            innovation.setTitle(partialUpdateDTO.getTitle());
+        }
+        if (partialUpdateDTO.getDescription() != null) {
+            innovation.setDescription(partialUpdateDTO.getDescription());
+        }
+        if (partialUpdateDTO.getPurpose() != null) {
+            innovation.setPurpose(partialUpdateDTO.getPurpose());
+        }
+        if (partialUpdateDTO.getCategory() != null) {
+            innovation.setCategory(Category.valueOf(partialUpdateDTO.getCategory()));
+        }
+        if (partialUpdateDTO.getAdditionalInfo() != null) {
+            innovation.setAdditionalInfo(partialUpdateDTO.getAdditionalInfo());
+        }
+        if (partialUpdateDTO.getReasonsProvingYouCanInvent() != null) {
+            innovation.setReasonsProvingYouCanInvent(partialUpdateDTO.getReasonsProvingYouCanInvent());
+        }
+        if (partialUpdateDTO.getImpact() != null) {
+            innovation.setImpact(partialUpdateDTO.getImpact());
+        }
+        if (partialUpdateDTO.getResourcesNeeded() != null) {
+            innovation.setResourcesNeeded(partialUpdateDTO.getResourcesNeeded());
+        }
+
+        // If a new attachment file is provided, handle the file upload
+        if (attachmentFile != null && !attachmentFile.isEmpty()) {
+            String filePath = fileStorageService.saveFile(attachmentFile); // Use your existing file storage service
+            innovation.setAttachment(filePath); // Update the file path in the Innovation entity
+        }
+
+        // Save the updated innovation object
         return innovationRepository.save(innovation);
     }
 
