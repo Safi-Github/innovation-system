@@ -3,21 +3,18 @@ package mcit.ddr.innovation.service;
 import lombok.RequiredArgsConstructor;
 import mcit.ddr.innovation.dto.InnovationDTO;
 import mcit.ddr.innovation.dto.PartialInnovationUpdateDTO;
+import mcit.ddr.innovation.entity.Category;
 import mcit.ddr.innovation.entity.Innovation;
 import mcit.ddr.innovation.entity.MyUser;
 import mcit.ddr.innovation.entity.Review;
-import mcit.ddr.innovation.enums.Category;
 import mcit.ddr.innovation.enums.InnovStatus;
-import mcit.ddr.innovation.enums.Role;
 import mcit.ddr.innovation.exception.ResourceNotFoundException;
-import mcit.ddr.innovation.enums.InnovStatus;
+import mcit.ddr.innovation.repository.CategoryRepository;
 import mcit.ddr.innovation.repository.InnovationRepository;
 import mcit.ddr.innovation.repository.MyUserRepository;
 import mcit.ddr.innovation.repository.ReviewRepository;
-import mcit.ddr.innovation.service.FileStorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -41,6 +38,8 @@ public class InnovationService {
     private final MyUserRepository myUserRepository;
     private final ReviewRepository reviewRepository;
     private final FileStorageService fileStorageService;
+    private final CategoryRepository categoryRepository;
+
 
     public Innovation createInnovation(Innovation innovation, MultipartFile attachmentFile) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -76,9 +75,13 @@ public class InnovationService {
         if (partialUpdateDTO.getPurpose() != null) {
             innovation.setPurpose(partialUpdateDTO.getPurpose());
         }
+        // Update only the fields present in the DTO, excluding status
         if (partialUpdateDTO.getCategory() != null) {
-            innovation.setCategory(Category.valueOf(partialUpdateDTO.getCategory()));
+            Category category = categoryRepository.findByName(partialUpdateDTO.getCategory())
+                    .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+            innovation.setCategory(category);
         }
+
         if (partialUpdateDTO.getAdditionalInfo() != null) {
             innovation.setAdditionalInfo(partialUpdateDTO.getAdditionalInfo());
         }

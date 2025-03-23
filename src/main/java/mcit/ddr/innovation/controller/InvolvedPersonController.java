@@ -40,9 +40,5 @@ public class InvolvedPersonController {
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/gitTesting{id}")
-    public ResponseEntity<Void> deleteInvolvedPerson(@PathVariable Long id) {
-        involvedPersonService.deleteInvolvedPerson(id);
-        return ResponseEntity.noContent().build();
-    }
+
 }
