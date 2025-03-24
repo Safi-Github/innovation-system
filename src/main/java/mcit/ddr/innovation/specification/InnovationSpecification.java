@@ -1,62 +1,57 @@
 package mcit.ddr.innovation.specification;
 import org.springframework.data.jpa.domain.Specification;
 import jakarta.persistence.criteria.*;
+import mcit.ddr.innovation.dto.InnovationSearchCriteriaDTO;
 import mcit.ddr.innovation.entity.Innovation;
-import mcit.ddr.innovation.entity.MyUser;
-import mcit.ddr.innovation.enums.Category;
-import mcit.ddr.innovation.enums.InnovStatus;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Date;
 
 public class InnovationSpecification {
 
-    public static Specification<Innovation> filterByCriteria(
-            Category category, InnovStatus status, Date createDate, Date lastModifiedDate,
-            Date assignedDate, MyUser assigner, MyUser boardMember, MyUser createdBy) {
+    public static Specification<Innovation> filterByCriteria(InnovationSearchCriteriaDTO criteria) {
         
         return (Root<Innovation> root, CriteriaQuery<?> query, CriteriaBuilder cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
             // 🟢 Filter by Category
-            if (category != null) {
-                predicates.add(cb.equal(root.get("category"), category));
+            if (criteria.getCategory() != null) {
+                predicates.add(cb.equal(root.get("category"), criteria.getCategory()));
             }
 
             // 🟢 Filter by Status
-            if (status != null) {
-                predicates.add(cb.equal(root.get("status"), status));
+            if (criteria.getStatus() != null) {
+                predicates.add(cb.equal(root.get("status"), criteria.getStatus()));
             }
 
             // 🟢 Filter by Create Date (Exact Date Match)
-            if (createDate != null) {
-                predicates.add(cb.equal(root.get("createDate"), createDate));
+            if (criteria.getCreateDate() != null) {
+                predicates.add(cb.equal(root.get("createDate"), criteria.getCreateDate()));
             }
 
             // 🟢 Filter by Last Modified Date (Exact Date Match)
-            if (lastModifiedDate != null) {
-                predicates.add(cb.equal(root.get("lastModifiedDate"), lastModifiedDate));
+            if (criteria.getLastModifiedDate() != null) {
+                predicates.add(cb.equal(root.get("lastModifiedDate"), criteria.getLastModifiedDate()));
             }
 
             // 🟢 Filter by Assigned Date (Exact Date Match)
-            if (assignedDate != null) {
-                predicates.add(cb.equal(root.get("assignedDate"), assignedDate));
+            if (criteria.getAssignedDate() != null) {
+                predicates.add(cb.equal(root.get("assignedDate"), criteria.getAssignedDate()));
             }
 
             // 🟢 Filter by Assigner
-            if (assigner != null) {
-                predicates.add(cb.equal(root.get("assigner"), assigner));
+            if (criteria.getAssigner() != null) {
+                predicates.add(cb.equal(root.get("assigner"), criteria.getAssigner()));
             }
 
             // 🟢 Filter by Board Member
-            if (boardMember != null) {
-                predicates.add(cb.equal(root.get("boardMember"), boardMember));
+            if (criteria.getBoardMember() != null) {
+                predicates.add(cb.equal(root.get("boardMember"), criteria.getBoardMember()));
             }
 
             // 🟢 Filter by Created By
-            if (createdBy != null) {
-                predicates.add(cb.equal(root.get("createdBy"), createdBy));
+            if (criteria.getCreatedBy() != null) {
+                predicates.add(cb.equal(root.get("createdBy"), criteria.getCreatedBy()));
             }
 
             // 🟢 Sorting: Most Recent First

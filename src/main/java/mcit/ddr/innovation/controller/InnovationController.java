@@ -1,6 +1,7 @@
 package mcit.ddr.innovation.controller;
 
 import mcit.ddr.innovation.dto.InnovationDTO;
+import mcit.ddr.innovation.dto.InnovationSearchCriteriaDTO;
 import mcit.ddr.innovation.dto.PartialInnovationUpdateDTO;
 import mcit.ddr.innovation.entity.Innovation;
 import mcit.ddr.innovation.entity.MyUser;
@@ -28,6 +29,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+
+import org.springframework.data.domain.Page;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -140,20 +143,33 @@ public class InnovationController {
     //     return ResponseEntity.ok(innovationService.getAllInnovations());
     // }
 
-    @GetMapping
-    public List<Innovation> searchInnovations(
-            @RequestParam(required = false) Category category,
-            @RequestParam(required = false) InnovStatus status,
-            @RequestParam(required = false) Date createDate,
-            @RequestParam(required = false) Date lastModifiedDate,
-            @RequestParam(required = false) Date assignedDate,
-            @RequestParam(required = false) MyUser assigner,
-            @RequestParam(required = false) MyUser boardMember,
-            @RequestParam(required = false) MyUser createdBy) {
+    //Innovation Search Criteria Without Pagination
+    // @GetMapping
+    // public List<Innovation> searchInnovations(
+    //         @RequestParam(required = false) Category category,
+    //         @RequestParam(required = false) InnovStatus status,
+    //         @RequestParam(required = false) Date createDate,
+    //         @RequestParam(required = false) Date lastModifiedDate,
+    //         @RequestParam(required = false) Date assignedDate,
+    //         @RequestParam(required = false) MyUser assigner,
+    //         @RequestParam(required = false) MyUser boardMember,
+    //         @RequestParam(required = false) MyUser createdBy) {
 
-        return innovationService.searchInnovations(
-                category, status, createDate, lastModifiedDate, assignedDate, assigner, boardMember, createdBy);
+    //     return innovationService.searchInnovations(
+    //             category, status, createDate, lastModifiedDate, assignedDate, assigner, boardMember, createdBy);
+    // }
+
+    @GetMapping
+    public ResponseEntity<List<Innovation>> searchInnovations(
+        InnovationSearchCriteriaDTO criteria, // Using DTO
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "5") int size,
+        @RequestParam(defaultValue = "id,asc") String[] sort) {
+
+        Page<Innovation> result = innovationService.searchInnovations(criteria, page, size, sort);
+        return ResponseEntity.ok(result.getContent());
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<Innovation> getInnovationById(@PathVariable Long id) {

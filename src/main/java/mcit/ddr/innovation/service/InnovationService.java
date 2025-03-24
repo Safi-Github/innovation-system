@@ -2,6 +2,7 @@ package mcit.ddr.innovation.service;
 
 import lombok.RequiredArgsConstructor;
 import mcit.ddr.innovation.dto.InnovationDTO;
+import mcit.ddr.innovation.dto.InnovationSearchCriteriaDTO;
 import mcit.ddr.innovation.dto.PartialInnovationUpdateDTO;
 import mcit.ddr.innovation.entity.Innovation;
 import mcit.ddr.innovation.entity.MyUser;
@@ -20,6 +21,7 @@ import mcit.ddr.innovation.specification.InnovationSpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,7 +29,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -196,15 +204,38 @@ public class InnovationService {
     //     return innovationRepository.findAll();
     // }
 
-    public List<Innovation> searchInnovations(
-            Category category, InnovStatus status, Date createDate, Date lastModifiedDate,
-            Date assignedDate, MyUser assigner, MyUser boardMember, MyUser createdBy) {
+    // public List<Innovation> searchInnovations(
+    //         Category category, InnovStatus status, Date createDate, Date lastModifiedDate,
+    //         Date assignedDate, MyUser assigner, MyUser boardMember, MyUser createdBy) {
 
-        Specification<Innovation> spec = InnovationSpecification.filterByCriteria(
-                category, status, createDate, lastModifiedDate, assignedDate, assigner, boardMember, createdBy);
+    //     Specification<Innovation> spec = InnovationSpecification.filterByCriteria(
+    //             category, status, createDate, lastModifiedDate, assignedDate, assigner, boardMember, createdBy);
 
-        return innovationRepository.findAll(spec);
+    //     return innovationRepository.findAll(spec);
+    // }
+
+    public Page<Innovation> searchInnovations(
+            InnovationSearchCriteriaDTO criteria,int page, int size, String[] sort)
+    {
+        Specification<Innovation> spec = InnovationSpecification.filterByCriteria(criteria);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(getSortOrders(sort)));
+        
+        return innovationRepository.findAll(spec, pageable);
     }
+
+    //Sorting Helper Method
+    private List<Sort.Order> getSortOrders(String[] sort) {
+        List<Sort.Order> orders = new ArrayList<>();
+        for (String sortOrder : sort) {
+            String[] split = sortOrder.split(",");
+            if (split.length == 2) {
+                orders.add(new Sort.Order(Sort.Direction.fromString(split[1]), split[0]));
+            }
+        }
+        return orders.isEmpty() ? List.of(new Sort.Order(Sort.Direction.ASC, "id")) : orders;
+    }
+
+
 
     public Optional<Innovation> getInnovationById(Long id) {
         return innovationRepository.findById(id);
