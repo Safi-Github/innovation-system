@@ -1,5 +1,6 @@
 package mcit.ddr.innovation.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import mcit.ddr.innovation.entity.Category;
 import mcit.ddr.innovation.repository.CategoryRepository;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,7 @@ public class CategoryService {
         this.categoryRepository = categoryRepository;
     }
 
-    // Create or update category
+    // Create category service
     public Category saveCategory(Category category) {
         return categoryRepository.save(category);
     }
@@ -30,6 +31,13 @@ public class CategoryService {
     // Get a category by ID
     public Category getCategoryById(Long id) {
         return categoryRepository.findById(id).orElseThrow(() -> new RuntimeException("Category not found"));
+    }
+
+    public Category updateCategory(Long id, Category updatedCategory) {
+        return categoryRepository.findById(id).map(category -> {
+            category.setName(updatedCategory.getName());
+            return categoryRepository.save(category);
+        }).orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + id));
     }
 
     // Delete a category

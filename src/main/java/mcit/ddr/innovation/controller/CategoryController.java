@@ -17,7 +17,7 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
-    // Create or update a category
+    // Create category endpoint
     @PostMapping("/categories")
     public ResponseEntity<Category> saveCategory(@RequestBody Category category) {
         Category savedCategory = categoryService.saveCategory(category);
@@ -35,6 +35,12 @@ public class CategoryController {
     @GetMapping("/categories/{id}")
     public ResponseEntity<Category> getCategoryById(@PathVariable Long id) {
         Category category = categoryService.getCategoryById(id);
+        return ResponseEntity.ok(category);
+    }
+
+    @PutMapping("/categories/{id}")
+    public ResponseEntity<Category> updateCategory(@PathVariable Long id, @RequestBody Category updatedCategory) {
+        Category category = categoryService.updateCategory(id, updatedCategory);
         return ResponseEntity.ok(category);
     }
 
