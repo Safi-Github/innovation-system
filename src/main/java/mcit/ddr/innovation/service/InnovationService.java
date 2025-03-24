@@ -15,9 +15,12 @@ import mcit.ddr.innovation.repository.InnovationRepository;
 import mcit.ddr.innovation.repository.MyUserRepository;
 import mcit.ddr.innovation.repository.ReviewRepository;
 import mcit.ddr.innovation.service.FileStorageService;
+import mcit.ddr.innovation.specification.InnovationSpecification;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -189,8 +192,18 @@ public class InnovationService {
         return innovation;
     }
 
-    public List<Innovation> getAllInnovations() {
-        return innovationRepository.findAll();
+    // public List<Innovation> getAllInnovations() {
+    //     return innovationRepository.findAll();
+    // }
+
+    public List<Innovation> searchInnovations(
+            Category category, InnovStatus status, Date createDate, Date lastModifiedDate,
+            Date assignedDate, MyUser assigner, MyUser boardMember, MyUser createdBy) {
+
+        Specification<Innovation> spec = InnovationSpecification.filterByCriteria(
+                category, status, createDate, lastModifiedDate, assignedDate, assigner, boardMember, createdBy);
+
+        return innovationRepository.findAll(spec);
     }
 
     public Optional<Innovation> getInnovationById(Long id) {

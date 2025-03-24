@@ -5,6 +5,7 @@ import mcit.ddr.innovation.dto.PartialInnovationUpdateDTO;
 import mcit.ddr.innovation.entity.Innovation;
 import mcit.ddr.innovation.entity.MyUser;
 import mcit.ddr.innovation.entity.Review;
+import mcit.ddr.innovation.enums.Category;
 import mcit.ddr.innovation.enums.InnovStatus;
 import mcit.ddr.innovation.repository.InnovationRepository;
 import mcit.ddr.innovation.repository.ReviewRepository;
@@ -14,7 +15,7 @@ import mcit.ddr.innovation.exception.FileValidationException;
 import mcit.ddr.innovation.exception.ResourceNotFoundException;
 import mcit.ddr.innovation.service.FileDownloadService;
 import mcit.ddr.innovation.service.InnovationService;
-
+import java.util.Date;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -134,9 +135,24 @@ public class InnovationController {
             return ResponseEntity.ok(responseDTO);
     }
 
+    // @GetMapping
+    // public ResponseEntity<List<Innovation>> getAllInnovations() {
+    //     return ResponseEntity.ok(innovationService.getAllInnovations());
+    // }
+
     @GetMapping
-    public ResponseEntity<List<Innovation>> getAllInnovations() {
-        return ResponseEntity.ok(innovationService.getAllInnovations());
+    public List<Innovation> searchInnovations(
+            @RequestParam(required = false) Category category,
+            @RequestParam(required = false) InnovStatus status,
+            @RequestParam(required = false) Date createDate,
+            @RequestParam(required = false) Date lastModifiedDate,
+            @RequestParam(required = false) Date assignedDate,
+            @RequestParam(required = false) MyUser assigner,
+            @RequestParam(required = false) MyUser boardMember,
+            @RequestParam(required = false) MyUser createdBy) {
+
+        return innovationService.searchInnovations(
+                category, status, createDate, lastModifiedDate, assignedDate, assigner, boardMember, createdBy);
     }
 
     @GetMapping("/{id}")
