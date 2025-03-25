@@ -64,6 +64,7 @@ public class InnovationController {
         this.fileDownloadService = fileDownloadService;
     }
 
+    // add innovation
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createInnovation(@Valid @RequestPart("innovation") Innovation innovation,
         @RequestPart(value = "attachmentFile", required = false) MultipartFile attachmentFile) {
@@ -107,15 +108,12 @@ public class InnovationController {
                 throw new FileValidationException("File size must be less than 3MB!");
             }
         }
-
         // Call the service method to perform the partial update, including handling file upload
         Innovation updatedInnovation = innovationService.partialUpdateInnovation(id, partialUpdateDTO, attachmentFile);
         return ResponseEntity.ok(updatedInnovation);
     }
 
-    
-
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    // assign innovation api
     @PutMapping("/assign/{id}")
     public ResponseEntity<Innovation> assignInnovation(@PathVariable Long id,@RequestBody Map<String, String> payload ) {
         Long assignerId = Long.parseLong(payload.get("assignerId"));
@@ -134,11 +132,13 @@ public class InnovationController {
             return ResponseEntity.ok(responseDTO);
     }
 
+    // get all innovation
     @GetMapping
     public ResponseEntity<List<Innovation>> getAllInnovations() {
         return ResponseEntity.ok(innovationService.getAllInnovations());
     }
 
+    // Get specific innovation
     @GetMapping("/{id}")
     public ResponseEntity<Innovation> getInnovationById(@PathVariable Long id) {
         return innovationService.getInnovationById(id)
@@ -146,6 +146,7 @@ public class InnovationController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    // Download the innovation attachment
    @GetMapping("/download/{id}")
     public ResponseEntity<?> downloadFile(@PathVariable Long id, HttpServletRequest request) {
         try {
@@ -175,5 +176,10 @@ public class InnovationController {
         }
     }
 
-
+    // Delete the innovation
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteInvolvedPerson(@PathVariable Long id) {
+        innovationService.deleteInnovation(id);
+        return ResponseEntity.noContent().build();
+    }
 }

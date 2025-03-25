@@ -22,10 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 @RequiredArgsConstructor
@@ -34,13 +32,12 @@ public class InnovationService {
 
     private static final Logger logger = LoggerFactory.getLogger(InnovationService.class);
     private final InnovationRepository innovationRepository;
-    // private final NotificationService notificationService;
     private final MyUserRepository myUserRepository;
     private final ReviewRepository reviewRepository;
     private final FileStorageService fileStorageService;
     private final CategoryRepository categoryRepository;
 
-
+    // create innovation
     public Innovation createInnovation(Innovation innovation, MultipartFile attachmentFile) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
@@ -48,7 +45,6 @@ public class InnovationService {
                 .orElseThrow(() -> new RuntimeException("User not found: " + username));
 
         innovation.setCreateDate(new Date());
-        // innovation.setLastModifiedDate(new Date());
         innovation.setIsAssigned(false);
         innovation.setStatus(InnovStatus.DRAFT);
         innovation.setCreatedBy(currentUser);
@@ -60,51 +56,57 @@ public class InnovationService {
         return innovationRepository.save(innovation);
     }
 
-    // partial update the innovation
+    // Partial update the innovation
+// Partial update the innovation
     public Innovation partialUpdateInnovation(Long innovationId, PartialInnovationUpdateDTO partialUpdateDTO, MultipartFile attachmentFile) {
         Innovation innovation = innovationRepository.findById(innovationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Innovation not found"));
 
-        // Update only the fields present in the DTO, excluding status
-        if (partialUpdateDTO.getTitle() != null) {
-            innovation.setTitle(partialUpdateDTO.getTitle());
+        boolean isUpdated = false; // Track if any field is updated
+
+        // Map of updatable fields
+        Map<Runnable, Object> updatableFields = new HashMap<>();
+        if (partialUpdateDTO.getTitle() != null) updatableFields.put(() -> innovation.setTitle(partialUpdateDTO.getTitle()), partialUpdateDTO.getTitle());
+        if (partialUpdateDTO.getDescription() != null) updatableFields.put(() -> innovation.setDescription(partialUpdateDTO.getDescription()), partialUpdateDTO.getDescription());
+        if (partialUpdateDTO.getPurpose() != null) updatableFields.put(() -> innovation.setPurpose(partialUpdateDTO.getPurpose()), partialUpdateDTO.getPurpose());
+        if (partialUpdateDTO.getAdditionalInfo() != null) updatableFields.put(() -> innovation.setAdditionalInfo(partialUpdateDTO.getAdditionalInfo()), partialUpdateDTO.getAdditionalInfo());
+        if (partialUpdateDTO.getReasonsProvingYouCanInvent() != null) updatableFields.put(() -> innovation.setReasonsProvingYouCanInvent(partialUpdateDTO.getReasonsProvingYouCanInvent()), partialUpdateDTO.getReasonsProvingYouCanInvent());
+        if (partialUpdateDTO.getImpact() != null) updatableFields.put(() -> innovation.setImpact(partialUpdateDTO.getImpact()), partialUpdateDTO.getImpact());
+        if (partialUpdateDTO.getResourcesNeeded() != null) updatableFields.put(() -> innovation.setResourcesNeeded(partialUpdateDTO.getResourcesNeeded()), partialUpdateDTO.getResourcesNeeded());
+
+        // Iterate and apply updates
+        for (Map.Entry<Runnable, Object> entry : updatableFields.entrySet()) {
+            entry.getKey().run();
+            isUpdated = true;
         }
-        if (partialUpdateDTO.getDescription() != null) {
-            innovation.setDescription(partialUpdateDTO.getDescription());
-        }
-        if (partialUpdateDTO.getPurpose() != null) {
-            innovation.setPurpose(partialUpdateDTO.getPurpose());
-        }
-        // Update only the fields present in the DTO, excluding status
-        if (partialUpdateDTO.getCategory() != null) {
-            Category category = categoryRepository.findByName(partialUpdateDTO.getCategory())
-                    .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+
+        // Handle category update
+        if (partialUpdateDTO.getCategoryId() != null) {
+            Category category = categoryRepository.findById(partialUpdateDTO.getCategoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + partialUpdateDTO.getCategoryId()));
             innovation.setCategory(category);
+            isUpdated = true;
         }
 
-        if (partialUpdateDTO.getAdditionalInfo() != null) {
-            innovation.setAdditionalInfo(partialUpdateDTO.getAdditionalInfo());
-        }
-        if (partialUpdateDTO.getReasonsProvingYouCanInvent() != null) {
-            innovation.setReasonsProvingYouCanInvent(partialUpdateDTO.getReasonsProvingYouCanInvent());
-        }
-        if (partialUpdateDTO.getImpact() != null) {
-            innovation.setImpact(partialUpdateDTO.getImpact());
-        }
-        if (partialUpdateDTO.getResourcesNeeded() != null) {
-            innovation.setResourcesNeeded(partialUpdateDTO.getResourcesNeeded());
-        }
-
-        // If a new attachment file is provided, handle the file upload
+        // Handle attachment upload
         if (attachmentFile != null && !attachmentFile.isEmpty()) {
-            String filePath = fileStorageService.saveFile(attachmentFile); // Use your existing file storage service
-            innovation.setAttachment(filePath); // Update the file path in the Innovation entity
+            try {
+                String filePath = fileStorageService.saveFile(attachmentFile);
+                innovation.setAttachment(filePath);
+                isUpdated = true;
+            } catch (Exception e) {
+                throw new RuntimeException("Error uploading attachment", e);
+            }
+        }
+
+        // Update the updateDate if any field is updated
+        if (isUpdated) {
+            innovation.setUpdateDate(new Date());
         }
 
         // Save the updated innovation object
         return innovationRepository.save(innovation);
     }
-
 
     //innovation status change service
     @Transactional
@@ -198,5 +200,23 @@ public class InnovationService {
 
     public Optional<Innovation> getInnovationById(Long id) {
         return innovationRepository.findById(id);
+    }
+
+    public void deleteInnovation(Long innovationId) {
+        // Check if the innovation exists
+        Innovation innovation = innovationRepository.findById(innovationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Innovation not found with id: " + innovationId));
+
+        // Perform any cleanup if needed (e.g., delete related records, attachments, etc.)
+        if (innovation.getAttachment() != null) {
+            try {
+                fileStorageService.deleteFile(innovation.getAttachment());
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to delete associated attachment", e);
+            }
+        }
+
+        // Delete the innovation
+        innovationRepository.delete(innovation);
     }
 }

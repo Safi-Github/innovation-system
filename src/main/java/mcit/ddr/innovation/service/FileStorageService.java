@@ -39,4 +39,14 @@ public class FileStorageService {
             throw new FileStorageException("Could not store file " + fileName, ex);
         }
     }
+
+    public void deleteFile(String filePath) {
+        try {
+            Path pathToDelete = Paths.get(filePath).toAbsolutePath().normalize();
+            Files.deleteIfExists(pathToDelete);  // Delete the file if it exists
+        } catch (IOException ex) {
+            throw new FileStorageException("Could not delete file at " + filePath, ex);
+        }
+    }
+
 }

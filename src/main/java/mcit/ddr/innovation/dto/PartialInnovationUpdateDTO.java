@@ -13,7 +13,7 @@ public class PartialInnovationUpdateDTO {
 
     private String purpose;
 
-    private String category;
+    private Long categoryId;
 
     private String additionalInfo;
 

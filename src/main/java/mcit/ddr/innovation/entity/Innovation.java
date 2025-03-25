@@ -5,13 +5,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import mcit.ddr.innovation.enums.InnovStatus;
-import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.annotation.CreatedBy;
 
 import java.util.Date;
 
 @Entity
 @Data
+@DynamicUpdate
 public class Innovation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,15 +46,18 @@ public class Innovation {
 
     private String attachment;
 
-    @Column(name = "CREATE_DATE", updatable = false)
+    @Column(updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
     @JsonFormat(pattern = "yyyy/MM/dd")
-    @CreationTimestamp
     @JsonIgnore
     private Date createDate;
 
+    //@UpdateTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    private Date lastModifiedDate;
+    @JsonFormat(pattern = "yyyy/MM/dd")
+    @JsonIgnore
+    private Date updateDate;
+
 
     private Boolean isAssigned;
 
