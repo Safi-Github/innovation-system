@@ -1,5 +1,10 @@
 package mcit.ddr.innovation.controller;
 
+import jakarta.validation.Valid;
+import mcit.ddr.innovation.dto.ResetPasswordOTPRequest;
+import mcit.ddr.innovation.dto.ResetPasswordRequest;
+import mcit.ddr.innovation.repository.ForgotPasswordRepository;
+import mcit.ddr.innovation.service.ForgotPasswordService;
 import org.apache.tomcat.util.http.HeaderUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -10,13 +15,7 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -24,8 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import org.springframework.web.bind.annotation.RestController;
 
 import mcit.ddr.innovation.entity.MyUser;
 import mcit.ddr.innovation.enums.LiteracyLevel;
@@ -39,15 +36,21 @@ import mcit.ddr.innovation.service.MyUserDetailService;
 public class UserController {
 
   private final MyUserRepository myUserRepository;
+  private final MyUserDetailService myUserDetailService;
+  private final ForgotPasswordRepository forgotPasswordRepository;
+  private final ForgotPasswordService forgotPasswordService;
 
-  public UserController(MyUserRepository myUserRepository) {
+  public UserController(MyUserRepository myUserRepository, MyUserDetailService myUserDetailService, ForgotPasswordRepository forgotPasswordRepository, ForgotPasswordService forgotPasswordService) {
       this.myUserRepository = myUserRepository;
+      this.myUserDetailService = myUserDetailService;
+      this.forgotPasswordRepository = forgotPasswordRepository;
+      this.forgotPasswordService = forgotPasswordService;
   }
 
-  @GetMapping("/users")
-//   @Secured("ROLE_ADMIN")
-//   @PreAuthorize("hasAuthority('ADMIN')")
-  public List<MyUser> getAllUsers() {
+   @GetMapping("/users")
+// @Secured("ROLE_ADMIN")
+// @PreAuthorize("hasAuthority('ADMIN')")
+   public List<MyUser> getAllUsers() {
       return myUserRepository.findAll();
   }
 
@@ -176,5 +179,36 @@ public class UserController {
     
         return ResponseEntity.ok(roles);
     }
+
+    @PostMapping("users/validate-otp-code")
+    public ResponseEntity<String> validateOtpCode(@Valid @RequestBody ResetPasswordRequest request) {
+        return forgotPasswordService.validateOtpCode(request);
+    }
+
+    // reset password end point
+    @PostMapping("users/reset-password")
+    public ResponseEntity<String> requestPasswordReset(
+            @RequestHeader("Authorization") String resetToken, // Get token from header
+            @Valid @RequestBody ResetPasswordRequest request) {
+
+        return forgotPasswordService.requestPasswordReset(resetToken, request);
+    }
+
+    @PostMapping("/users/forgot-password")
+    public ResponseEntity<String> createAndSendOtpCodeToEmail(
+            @Valid @RequestBody ResetPasswordOTPRequest request) {
+        ResponseEntity<String> result = forgotPasswordService.createOtpCode(request);
+
+        // Simply return the result directly since result already contains status and body
+        return result;
+    }
+
+
+
+
+
+
+
+
 
 }

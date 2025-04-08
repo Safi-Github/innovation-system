@@ -2,6 +2,7 @@ package mcit.ddr.innovation.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -10,11 +11,7 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.time.Instant;
-import java.util.Base64;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -22,12 +19,13 @@ import java.util.stream.Collectors;
 public class JwtUtilityClass {
 
     private static final String SECRET = "YCfSGDFu+xkCpm8iDAhkJy6VrtaFJE9X1uC5kkA9YVcfN0ARhcuMAeAsMpaLotYYx32HwDSAm7BEqOtpnUOHRA==";
-    private static final long VALIDITY = TimeUnit.HOURS.toMillis(48);
+    private static final long ACCESS_TOKEN_VALIDITY = TimeUnit.HOURS.toMillis(48);
+    private static final long RESET_TOKEN_VALIDITY = TimeUnit.MINUTES.toMillis(10); // 10 minutes
 
+    // Generate Access Token with roles
     public String generateToken(UserDetails userDetails) {
-        Map<String, Object> claims = new HashMap<>(); // Fix: Map<String, Object> instead of String
+        Map<String, Object> claims = new HashMap<>();
         claims.put("iss", "https://secure.ddr.com");
-        // ✅ Add roles to JWT
         List<String> roles = userDetails.getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
@@ -35,23 +33,45 @@ public class JwtUtilityClass {
         claims.put("roles", roles);
 
         return Jwts.builder()
-                .setClaims(claims)  // Fix: Use setClaims instead of claims()
+                .setClaims(claims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(Date.from(Instant.now()))
-                .setExpiration(Date.from(Instant.now().plusMillis(VALIDITY)))
-                .signWith(generateKey()) // Fix: Use signWith() directly
+                .setExpiration(Date.from(Instant.now().plusMillis(ACCESS_TOKEN_VALIDITY)))
+                .signWith(generateKey(), SignatureAlgorithm.HS512)
                 .compact();
-    }  
-
-    private SecretKey generateKey() {
-        byte[] decodedKey = Base64.getDecoder().decode(SECRET);
-        return Keys.hmacShaKeyFor(decodedKey);
     }
 
-    // ✅ Extract user roles from JWT
+    // Generate Reset Token
+    public String generateResetToken(String username) {
+        return Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(Date.from(Instant.now()))
+                .setExpiration(Date.from(Instant.now().plusMillis(RESET_TOKEN_VALIDITY)))
+                .signWith(generateKey(), SignatureAlgorithm.HS512)
+                .compact();
+    }
+
+    // Validate Reset Token
+    public String validateResetToken(String token) {
+        try {
+            if (token.startsWith("Bearer ")) {
+                token = token.substring(7);
+            }
+
+            Claims claims = getClaims(token);
+            Date expiration = claims.getExpiration();
+            if (expiration != null && expiration.before(new Date())) {
+                return null; // expired
+            }
+            return claims.getSubject(); // return email/username
+        } catch (Exception e) {
+            return null; // invalid
+        }
+    }
+
     public List<String> extractRoles(String jwt) {
         Claims claims = getClaims(jwt);
-        return claims.get("roles", List.class); // Retrieve roles as a list
+        return claims.get("roles", List.class);
     }
 
     public String extractUsername(String jwt) {
@@ -59,19 +79,25 @@ public class JwtUtilityClass {
         return claims.getSubject();
     }
 
+    public boolean isTokenValid(String jwt) {
+        try {
+            Claims claims = getClaims(jwt);
+            return claims.getExpiration().after(Date.from(Instant.now()));
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     private Claims getClaims(String jwt) {
         return Jwts.parserBuilder()
-                .setSigningKey(generateKey())  // ✅ Use setSigningKey() instead of verifyWith()
+                .setSigningKey(generateKey())
                 .build()
                 .parseClaimsJws(jwt)
                 .getBody();
     }
-    
 
-    public boolean isTokenValid(String jwt) {
-        Claims claims = getClaims(jwt);
-        return claims.getExpiration().after(Date.from(Instant.now()));
+    private SecretKey generateKey() {
+        byte[] decodedKey = Base64.getDecoder().decode(SECRET);
+        return Keys.hmacShaKeyFor(decodedKey);
     }
-
-
 }
