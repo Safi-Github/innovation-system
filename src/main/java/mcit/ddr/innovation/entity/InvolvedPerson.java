@@ -1,5 +1,10 @@
 package mcit.ddr.innovation.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -40,8 +45,13 @@ public class InvolvedPerson {
     private PersonType personType;
 
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "innovation_id", nullable = false)
-    private Innovation innovation;
+    // @ManyToOne(fetch = FetchType.EAGER)
+    // @JoinColumn(name = "innovation_id", nullable = false)
+    // private Innovation innovation;
+
+
+    @ManyToMany(mappedBy = "involvedPersons")  // This is the inverse side of the relationship
+    @JsonIgnoreProperties("involvedPersons")
+    private List<Innovation> innovations = new ArrayList<>();
 
 }

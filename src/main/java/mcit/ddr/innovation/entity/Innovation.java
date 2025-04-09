@@ -2,6 +2,8 @@ package mcit.ddr.innovation.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -11,7 +13,9 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedBy;
 import org.w3c.dom.Text;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Data
@@ -75,4 +79,14 @@ public class Innovation {
     @ManyToOne
     @JoinColumn(name = "created_by", updatable = false)
     private MyUser createdBy;
+
+    //InvovledPersons
+    @ManyToMany
+    @JoinTable(
+        name = "innovation_involved_person",  // Join table for the relationship
+        joinColumns = @JoinColumn(name = "innovation_id"),
+        inverseJoinColumns = @JoinColumn(name = "involved_person_id")
+    )
+    @JsonIgnoreProperties("innovations")
+    private List<InvolvedPerson> involvedPersons = new ArrayList<>();
 }

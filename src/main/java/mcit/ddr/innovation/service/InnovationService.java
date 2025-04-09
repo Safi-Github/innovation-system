@@ -1,8 +1,10 @@
 package mcit.ddr.innovation.service;
 
 import lombok.RequiredArgsConstructor;
-import mcit.ddr.innovation.dto.InnovationDTO;
+import mcit.ddr.innovation.dto.InnovationAssignmentResponseDTO;
+// import mcit.ddr.innovation.dto.InnovationDTO;
 import mcit.ddr.innovation.dto.InnovationSearchCriteriaDTO;
+import mcit.ddr.innovation.dto.InnovationStatusChangeResponseDTO;
 import mcit.ddr.innovation.dto.PartialInnovationUpdateDTO;
 import mcit.ddr.innovation.entity.Innovation;
 import mcit.ddr.innovation.entity.MyUser;
@@ -116,7 +118,7 @@ public class InnovationService {
 
     //innovation status change service
     @Transactional
-    public InnovationDTO updateInnovationStatus(Long id, Map<String, String> payload) {
+    public InnovationStatusChangeResponseDTO updateInnovationStatus(Long id, Map<String, String> payload) {
         Innovation innovation = innovationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Innovation record not found!"));
 
@@ -145,13 +147,21 @@ public class InnovationService {
             logger.debug("Innovation status changed to REJECTED.");
         }
 
-        return new InnovationDTO(innovation.getId(), innovation.getTitle(), innovation.getStatus());
+        // Return the InnovationDTO with the required fields
+        return new InnovationStatusChangeResponseDTO(
+            innovation.getId(),
+            innovation.getTitle(),
+            innovation.getStatus(),
+            stateChangedByUser,  // state changed by the user
+            log.getCreatedDate(),  // created on date
+            log.getComment()
+        );
     }
 
 
     //innovation assignment service
     @Transactional
-    public Innovation assignInnovation(Long innovationId,Long assignerId, Long boardMemberId, String status,String comment) {
+    public InnovationAssignmentResponseDTO assignInnovation(Long innovationId,Long assignerId, Long boardMemberId, String status,String comment) {
         // Retrieve the innovation
         Innovation innovation = innovationRepository.findById(innovationId)
                 .orElseThrow(() -> new RuntimeException("Innovation not found"));
@@ -176,9 +186,10 @@ public class InnovationService {
 
         Review log = new Review();
         log.setStateChangedTo(InnovStatus.valueOf(status.toUpperCase()));
-        log.setComment(comment);
         log.setCreatedBy(assigner);
         log.setCreatedDate(LocalDate.now());
+        log.setComment(comment);
+        log.setAssignedTo(boardMember);
         log.setInnovation(innovation);
         reviewRepository.save(log);
 
@@ -197,7 +208,16 @@ public class InnovationService {
         //         "You have been assigned an innovation: " + innovation.getTitle() + innovationId
         // );
 
-        return innovation;
+        // Return assignment response DTO
+        return new InnovationAssignmentResponseDTO(
+            innovation.getId(),
+            innovation.getTitle(),
+            innovation.getStatus(),
+            innovation.getBoardMember(),
+            innovation.getAssigner(),
+            log.getCreatedDate(),
+            log.getComment()
+        );
     }
 
     // public List<Innovation> getAllInnovations() {

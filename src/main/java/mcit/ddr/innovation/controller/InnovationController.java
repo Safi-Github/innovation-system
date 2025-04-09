@@ -1,7 +1,9 @@
 package mcit.ddr.innovation.controller;
 
-import mcit.ddr.innovation.dto.InnovationDTO;
+import mcit.ddr.innovation.dto.InnovationAssignmentResponseDTO;
+// import mcit.ddr.innovation.dto.InnovationDTO;
 import mcit.ddr.innovation.dto.InnovationSearchCriteriaDTO;
+import mcit.ddr.innovation.dto.InnovationStatusChangeResponseDTO;
 import mcit.ddr.innovation.dto.PartialInnovationUpdateDTO;
 import mcit.ddr.innovation.entity.Innovation;
 import mcit.ddr.innovation.entity.MyUser;
@@ -119,22 +121,22 @@ public class InnovationController {
 
     
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    // @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/assign/{id}")
-    public ResponseEntity<Innovation> assignInnovation(@PathVariable Long id,@RequestBody Map<String, String> payload ) {
+    public ResponseEntity<InnovationAssignmentResponseDTO> assignInnovation(@PathVariable Long id,@RequestBody Map<String, String> payload ) {
         Long assignerId = Long.parseLong(payload.get("assignerId"));
         Long boardMemberId = Long.parseLong(payload.get("boardMemberId"));
         String statusValue = payload.get("status");
         String comment = payload.get("comment");
 
-        Innovation updatedInnovation = innovationService.assignInnovation(id, assignerId, boardMemberId, statusValue, comment);
+        InnovationAssignmentResponseDTO updatedInnovation = innovationService.assignInnovation(id, assignerId, boardMemberId, statusValue, comment);
         return ResponseEntity.ok(updatedInnovation);
     }
 
     //innovation status changing api
     @PutMapping("/status/{id}")
     public ResponseEntity<?> updateInnovationStatus(@PathVariable Long id, @RequestBody Map<String, String> payload) {
-        InnovationDTO responseDTO = innovationService.updateInnovationStatus(id, payload);
+        InnovationStatusChangeResponseDTO responseDTO = innovationService.updateInnovationStatus(id, payload);
             return ResponseEntity.ok(responseDTO);
     }
 

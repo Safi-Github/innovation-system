@@ -25,6 +25,10 @@ public class Review {
     private String comment;
 
     @ManyToOne
+    @JoinColumn(name = "assigned_to_id", nullable = true)
+    private MyUser assignedTo;
+
+    @ManyToOne
     @JoinColumn(name = "innovation_id")
     private Innovation innovation;
 
@@ -67,6 +71,14 @@ public class Review {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    public MyUser getAssignedTo() {
+        return assignedTo;
+    }
+    
+    public void setAssignedTo(MyUser assignedTo) {
+        this.assignedTo = assignedTo;
     }
 
     public Innovation getInnovation() {
