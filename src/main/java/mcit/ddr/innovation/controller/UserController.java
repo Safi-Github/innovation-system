@@ -1,20 +1,16 @@
 package mcit.ddr.innovation.controller;
 
 import jakarta.validation.Valid;
+import mcit.ddr.innovation.dto.ChangePasswordRequest;
 import mcit.ddr.innovation.dto.ResetPasswordOTPRequest;
 import mcit.ddr.innovation.dto.ResetPasswordRequest;
 import mcit.ddr.innovation.repository.ForgotPasswordRepository;
 import mcit.ddr.innovation.service.ForgotPasswordService;
-import org.apache.tomcat.util.http.HeaderUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.util.ReflectionUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.lang.reflect.Field;
@@ -27,7 +23,6 @@ import java.util.stream.Collectors;
 import mcit.ddr.innovation.entity.MyUser;
 import mcit.ddr.innovation.enums.LiteracyLevel;
 import mcit.ddr.innovation.enums.Role;
-import mcit.ddr.innovation.jwt.JwtUtilityClass;
 import mcit.ddr.innovation.repository.MyUserRepository;
 import mcit.ddr.innovation.service.MyUserDetailService;
 
@@ -202,6 +197,21 @@ public class UserController {
         // Simply return the result directly since result already contains status and body
         return result;
     }
+
+
+    @PutMapping("users/change-password")
+    public ResponseEntity<String> changePassword(
+            @RequestBody ChangePasswordRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        try {
+            myUserDetailService.changePassword(userDetails.getUsername(), request);
+            return ResponseEntity.ok("Password changed successfully.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
 
 
 
