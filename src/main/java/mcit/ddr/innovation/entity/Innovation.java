@@ -55,7 +55,7 @@ public class Innovation {
     @Temporal(TemporalType.TIMESTAMP)
     @JsonFormat(pattern = "yyyy/MM/dd")
     @CreationTimestamp
-    @JsonIgnore
+    // @JsonIgnore
     private Date createDate;
 
     @Temporal(TemporalType.TIMESTAMP)
