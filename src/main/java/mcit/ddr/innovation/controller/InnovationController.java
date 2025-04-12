@@ -180,6 +180,12 @@ public class InnovationController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteInnovationById(@PathVariable Long id) {
+        innovationService.deleteInnovationById(id);
+        return ResponseEntity.noContent().build();
+    }
+
    @GetMapping("/download/{id}")
     public ResponseEntity<?> downloadFile(@PathVariable Long id, HttpServletRequest request) {
         try {

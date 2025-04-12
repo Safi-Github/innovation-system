@@ -31,6 +31,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.persistence.EntityNotFoundException;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
@@ -259,5 +261,20 @@ public class InnovationService {
 
     public Optional<Innovation> getInnovationById(Long id) {
         return innovationRepository.findById(id);
+    }
+
+    public void deleteInnovationById(Long id) {
+        Optional<Innovation> innovation = innovationRepository.findById(id);
+        if (innovation.isPresent()) {
+            // Check if boardMemberId is assigned
+            if (innovation.get().getBoardMember() != null) {
+                throw new IllegalStateException("This innovation is assigned to a board member and cannot be deleted.");
+            }
+        
+            // If no board member is assigned, proceed with deletion
+            innovationRepository.deleteById(id);
+        } else {
+            throw new EntityNotFoundException("Innovation with ID " + id + " not found.");
+        }
     }
 }
