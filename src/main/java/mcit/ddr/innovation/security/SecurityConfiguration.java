@@ -70,6 +70,7 @@ public class SecurityConfiguration {
                     registry.requestMatchers("/home", "/api/register/**", "/api/authenticate").permitAll();
                     registry.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll();
                     registry.requestMatchers("/api/users/**", "/api/account/**").permitAll();
+                    registry.requestMatchers(HttpMethod.GET, "/api/user/{id}").permitAll();
                     registry.requestMatchers(HttpMethod.POST, "/api/**").permitAll();
                     registry.anyRequest().authenticated();
                 })

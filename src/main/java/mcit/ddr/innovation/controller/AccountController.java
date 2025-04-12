@@ -93,7 +93,7 @@ public class AccountController {
                 )
             );
 
-            //checi user isActive or not
+            // check user isActive or not
             MyUser user = myUserRepository.findByUsername(loginForm.username())
             .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 

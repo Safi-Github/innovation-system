@@ -32,22 +32,18 @@ public class UserController {
 
   private final MyUserRepository myUserRepository;
   private final MyUserDetailService myUserDetailService;
-  private final ForgotPasswordRepository forgotPasswordRepository;
   private final ForgotPasswordService forgotPasswordService;
 
   public UserController(MyUserRepository myUserRepository, MyUserDetailService myUserDetailService, ForgotPasswordRepository forgotPasswordRepository, ForgotPasswordService forgotPasswordService) {
       this.myUserRepository = myUserRepository;
       this.myUserDetailService = myUserDetailService;
-      this.forgotPasswordRepository = forgotPasswordRepository;
       this.forgotPasswordService = forgotPasswordService;
   }
 
    @GetMapping("/users")
-// @Secured("ROLE_ADMIN")
-// @PreAuthorize("hasAuthority('ADMIN')")
    public List<MyUser> getAllUsers() {
       return myUserRepository.findAll();
-  }
+   }
 
   //get specific user
   @GetMapping("/user/{id}")
@@ -55,52 +51,11 @@ public class UserController {
       return myUserRepository.findById(id);
   }
 
-    //  update user 
-//   @PutMapping("/user/{id}")
-//   public ResponseEntity<MyUser> updateUser(@PathVariable Long id, @RequestBody MyUser userDetails) {
-//      Optional<MyUser> existingUser = myUserRepository.findById(id);
-//      if (existingUser.isEmpty()) {
-//         return ResponseEntity.notFound().build();
-//      }
 
-//      MyUser user = existingUser.get();
-//      user.setUsername(userDetails.getUsername());
-//      user.setRole(userDetails.getRole()); // Adjust according to your entity fields
-
-//      MyUser updatedUser = myUserRepository.save(user);
-
-//      return ResponseEntity.ok()
-//             .body(updatedUser);
-//     }
-
-    //partial update
-    // @PatchMapping("/user/{id}")
-    // public ResponseEntity<MyUser> updateUser(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
-    //     Optional<MyUser> existingUser = myUserRepository.findById(id);
-    
-    //     if (existingUser.isEmpty()) {
-    //         return ResponseEntity.notFound().build();
-    //     }
-
-    //     MyUser user = existingUser.get();
-
-    //     updates.forEach((field, value) -> {
-    //         Field userField = org.springframework.util.ReflectionUtils.findField(MyUser.class, field);
-    //         if (userField != null) {
-    //             userField.setAccessible(true);
-    //             ReflectionUtils.setField(userField, user, value);
-    //         }
-    //     });
-
-    //     MyUser updatedUser = myUserRepository.save(user);
-
-    //     return ResponseEntity.ok(updatedUser);
-    // }
-
-    //partial update
-    @PatchMapping("/user/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
-        Optional<MyUser> existingUserOpt = myUserRepository.findById(id);
+  //partial update
+  @PatchMapping("/user/{id}")
+  public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
+      Optional<MyUser> existingUserOpt = myUserRepository.findById(id);
 
         if (existingUserOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -144,7 +99,7 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-
+    // Delete user by id
     @DeleteMapping("/users/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         if (!myUserRepository.existsById(id)) {
@@ -175,6 +130,7 @@ public class UserController {
         return ResponseEntity.ok(roles);
     }
 
+    // validate otp endpoint
     @PostMapping("users/validate-otp-code")
     public ResponseEntity<String> validateOtpCode(@Valid @RequestBody ResetPasswordRequest request) {
         return forgotPasswordService.validateOtpCode(request);
@@ -189,6 +145,7 @@ public class UserController {
         return forgotPasswordService.requestPasswordReset(resetToken, request);
     }
 
+    // Forgot Password Endpoint
     @PostMapping("/users/forgot-password")
     public ResponseEntity<String> createAndSendOtpCodeToEmail(
             @Valid @RequestBody ResetPasswordOTPRequest request) {
@@ -199,6 +156,7 @@ public class UserController {
     }
 
 
+    // change password endpoint
     @PutMapping("users/change-password")
     public ResponseEntity<String> changePassword(
             @RequestBody ChangePasswordRequest request,
