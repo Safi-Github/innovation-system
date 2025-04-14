@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-import mcit.ddr.innovation.enums.Category;
+// import mcit.ddr.innovation.enums.Category;
 import mcit.ddr.innovation.enums.InnovStatus;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedBy;
@@ -32,8 +32,8 @@ public class Innovation {
 
     private String purpose;
 
-    @Enumerated(EnumType.STRING)
-    private Category category;
+ 
+    private String category;
 
     @Column(columnDefinition = "TEXT")
     private String additionalInfo;

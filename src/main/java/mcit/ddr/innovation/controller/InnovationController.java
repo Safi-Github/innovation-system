@@ -1,6 +1,7 @@
 package mcit.ddr.innovation.controller;
 
 import mcit.ddr.innovation.dto.InnovationAssignmentResponseDTO;
+import mcit.ddr.innovation.dto.InnovationPaginatedResponseDTO;
 // import mcit.ddr.innovation.dto.InnovationDTO;
 import mcit.ddr.innovation.dto.InnovationSearchCriteriaDTO;
 import mcit.ddr.innovation.dto.InnovationStatusChangeResponseDTO;
@@ -8,7 +9,7 @@ import mcit.ddr.innovation.dto.PartialInnovationUpdateDTO;
 import mcit.ddr.innovation.entity.Innovation;
 import mcit.ddr.innovation.entity.MyUser;
 import mcit.ddr.innovation.entity.Review;
-import mcit.ddr.innovation.enums.Category;
+// import mcit.ddr.innovation.enums.Category;
 import mcit.ddr.innovation.enums.InnovStatus;
 import mcit.ddr.innovation.repository.InnovationRepository;
 import mcit.ddr.innovation.repository.ReviewRepository;
@@ -162,14 +163,25 @@ public class InnovationController {
     // }
 
     @GetMapping
-    public ResponseEntity<List<Innovation>> searchInnovations(
+    public ResponseEntity<InnovationPaginatedResponseDTO> searchInnovations(
         InnovationSearchCriteriaDTO criteria, // Using DTO
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "5") int size,
         @RequestParam(defaultValue = "id,asc") String[] sort) {
 
         Page<Innovation> result = innovationService.searchInnovations(criteria, page, size, sort);
-        return ResponseEntity.ok(result.getContent());
+        
+        InnovationPaginatedResponseDTO<Innovation> response = new InnovationPaginatedResponseDTO<>(
+            result.getContent(),
+            result.getNumber(),
+            result.getSize(),
+            result.getTotalElements(),
+            result.getTotalPages(),
+            result.hasNext(),
+            result.hasPrevious()
+        );
+    
+        return ResponseEntity.ok(response);
     }
 
 

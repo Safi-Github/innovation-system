@@ -58,4 +58,6 @@ public class InvolvedPersonController {
         involvedPersonService.deleteInvolvedPerson(id);
         return ResponseEntity.noContent().build();
     }
+
+
 }

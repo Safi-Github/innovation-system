@@ -1,7 +1,7 @@
 package mcit.ddr.innovation.dto;
 
 import mcit.ddr.innovation.entity.MyUser;
-import mcit.ddr.innovation.enums.Category;
+// import mcit.ddr.innovation.enums.Category;
 import mcit.ddr.innovation.enums.InnovStatus;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,7 +11,7 @@ import java.util.Date;
 @Getter
 @Setter
 public class InnovationSearchCriteriaDTO {
-    private Category category;
+    private String category;
     private InnovStatus status;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")

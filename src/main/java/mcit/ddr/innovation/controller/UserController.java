@@ -1,22 +1,17 @@
 package mcit.ddr.innovation.controller;
 
-import org.apache.tomcat.util.http.HeaderUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
+import jakarta.validation.Valid;
+import mcit.ddr.innovation.dto.ChangePasswordRequest;
+import mcit.ddr.innovation.dto.ResetPasswordOTPRequest;
+import mcit.ddr.innovation.dto.ResetPasswordRequest;
+import mcit.ddr.innovation.repository.ForgotPasswordRepository;
+import mcit.ddr.innovation.service.ForgotPasswordService;
 import org.springframework.data.util.ReflectionUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -25,12 +20,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.springframework.web.bind.annotation.RestController;
-
 import mcit.ddr.innovation.entity.MyUser;
 import mcit.ddr.innovation.enums.LiteracyLevel;
 import mcit.ddr.innovation.enums.Role;
-import mcit.ddr.innovation.jwt.JwtUtilityClass;
 import mcit.ddr.innovation.repository.MyUserRepository;
 import mcit.ddr.innovation.service.MyUserDetailService;
 
@@ -39,17 +31,19 @@ import mcit.ddr.innovation.service.MyUserDetailService;
 public class UserController {
 
   private final MyUserRepository myUserRepository;
+  private final MyUserDetailService myUserDetailService;
+  private final ForgotPasswordService forgotPasswordService;
 
-  public UserController(MyUserRepository myUserRepository) {
+  public UserController(MyUserRepository myUserRepository, MyUserDetailService myUserDetailService, ForgotPasswordRepository forgotPasswordRepository, ForgotPasswordService forgotPasswordService) {
       this.myUserRepository = myUserRepository;
+      this.myUserDetailService = myUserDetailService;
+      this.forgotPasswordService = forgotPasswordService;
   }
 
-  @GetMapping("/users")
-//   @Secured("ROLE_ADMIN")
-//   @PreAuthorize("hasAuthority('ADMIN')")
-  public List<MyUser> getAllUsers() {
+   @GetMapping("/users")
+   public List<MyUser> getAllUsers() {
       return myUserRepository.findAll();
-  }
+   }
 
   //get specific user
   @GetMapping("/user/{id}")
@@ -57,52 +51,11 @@ public class UserController {
       return myUserRepository.findById(id);
   }
 
-    //  update user 
-//   @PutMapping("/user/{id}")
-//   public ResponseEntity<MyUser> updateUser(@PathVariable Long id, @RequestBody MyUser userDetails) {
-//      Optional<MyUser> existingUser = myUserRepository.findById(id);
-//      if (existingUser.isEmpty()) {
-//         return ResponseEntity.notFound().build();
-//      }
 
-//      MyUser user = existingUser.get();
-//      user.setUsername(userDetails.getUsername());
-//      user.setRole(userDetails.getRole()); // Adjust according to your entity fields
-
-//      MyUser updatedUser = myUserRepository.save(user);
-
-//      return ResponseEntity.ok()
-//             .body(updatedUser);
-//     }
-
-    //partial update
-    // @PatchMapping("/user/{id}")
-    // public ResponseEntity<MyUser> updateUser(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
-    //     Optional<MyUser> existingUser = myUserRepository.findById(id);
-    
-    //     if (existingUser.isEmpty()) {
-    //         return ResponseEntity.notFound().build();
-    //     }
-
-    //     MyUser user = existingUser.get();
-
-    //     updates.forEach((field, value) -> {
-    //         Field userField = org.springframework.util.ReflectionUtils.findField(MyUser.class, field);
-    //         if (userField != null) {
-    //             userField.setAccessible(true);
-    //             ReflectionUtils.setField(userField, user, value);
-    //         }
-    //     });
-
-    //     MyUser updatedUser = myUserRepository.save(user);
-
-    //     return ResponseEntity.ok(updatedUser);
-    // }
-
-    //partial update
-    @PatchMapping("/user/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
-        Optional<MyUser> existingUserOpt = myUserRepository.findById(id);
+  //partial update
+  @PatchMapping("/user/{id}")
+  public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
+      Optional<MyUser> existingUserOpt = myUserRepository.findById(id);
 
         if (existingUserOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -146,7 +99,7 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-
+    // Delete user by id
     @DeleteMapping("/users/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         if (!myUserRepository.existsById(id)) {
@@ -176,5 +129,53 @@ public class UserController {
     
         return ResponseEntity.ok(roles);
     }
+
+    // validate otp endpoint
+    @PostMapping("users/validate-otp-code")
+    public ResponseEntity<String> validateOtpCode(@Valid @RequestBody ResetPasswordRequest request) {
+        return forgotPasswordService.validateOtpCode(request);
+    }
+
+    // reset password end point
+    @PostMapping("users/reset-password")
+    public ResponseEntity<String> requestPasswordReset(
+            @RequestHeader("Authorization") String resetToken, // Get token from header
+            @Valid @RequestBody ResetPasswordRequest request) {
+
+        return forgotPasswordService.requestPasswordReset(resetToken, request);
+    }
+
+    // Forgot Password Endpoint
+    @PostMapping("/users/forgot-password")
+    public ResponseEntity<String> createAndSendOtpCodeToEmail(
+            @Valid @RequestBody ResetPasswordOTPRequest request) {
+        ResponseEntity<String> result = forgotPasswordService.createOtpCode(request);
+
+        // Simply return the result directly since result already contains status and body
+        return result;
+    }
+
+
+    // change password endpoint
+    @PutMapping("users/change-password")
+    public ResponseEntity<String> changePassword(
+            @RequestBody ChangePasswordRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        // Perform password change logic
+        myUserDetailService.changePassword(userDetails.getUsername(), request);
+
+        // Return a success response
+        return ResponseEntity.ok("Password changed successfully.");
+    }
+
+
+
+
+
+
+
+
+
 
 }

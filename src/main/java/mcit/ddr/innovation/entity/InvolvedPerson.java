@@ -9,7 +9,6 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import mcit.ddr.innovation.enums.Category;
 import mcit.ddr.innovation.enums.PersonType;
 
 @Entity
@@ -39,7 +38,7 @@ public class InvolvedPerson {
     @Email
     private String email;
 
-    private Number involvedPercentage;
+    private Integer involvedPercentage;
 
     @Enumerated(EnumType.STRING)
     private PersonType personType;

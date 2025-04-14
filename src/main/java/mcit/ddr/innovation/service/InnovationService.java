@@ -9,7 +9,7 @@ import mcit.ddr.innovation.dto.PartialInnovationUpdateDTO;
 import mcit.ddr.innovation.entity.Innovation;
 import mcit.ddr.innovation.entity.MyUser;
 import mcit.ddr.innovation.entity.Review;
-import mcit.ddr.innovation.enums.Category;
+// import mcit.ddr.innovation.enums.Category;
 import mcit.ddr.innovation.enums.InnovStatus;
 import mcit.ddr.innovation.enums.Role;
 import mcit.ddr.innovation.exception.ResourceNotFoundException;
@@ -92,7 +92,7 @@ public class InnovationService {
             innovation.setPurpose(partialUpdateDTO.getPurpose());
         }
         if (partialUpdateDTO.getCategory() != null) {
-            innovation.setCategory(Category.valueOf(partialUpdateDTO.getCategory()));
+            innovation.setCategory(partialUpdateDTO.getCategory());
         }
         if (partialUpdateDTO.getAdditionalInfo() != null) {
             innovation.setAdditionalInfo(partialUpdateDTO.getAdditionalInfo());
