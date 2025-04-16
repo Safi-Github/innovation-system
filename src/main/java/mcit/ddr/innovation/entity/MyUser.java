@@ -57,7 +57,18 @@ public class MyUser {
     @Column(columnDefinition = "boolean default true")
     private Boolean isActive = true;
 
+    @Column(name = "profile_image")
+    private String profileImage;
+
     // Getters and Setters
+    public String getProfileImage() {
+        return profileImage;
+    }
+
+    public void setProfileImage(String profileImage) {
+        this.profileImage = profileImage;
+    }
+
     public Long getId() {
         return id;
     }
