@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotBlank;
 import mcit.ddr.innovation.enums.LiteracyLevel;
 import mcit.ddr.innovation.enums.Role;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -56,6 +57,9 @@ public class MyUser {
 
     @Column(columnDefinition = "boolean default true")
     private Boolean isActive = true;
+
+    @Column(updatable = false)
+    private LocalDate createDate;
 
     // Getters and Setters
     public Long getId() {
@@ -152,5 +156,18 @@ public class MyUser {
 
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        this.createDate = LocalDate.now();
+    }
+
+    public LocalDate getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(LocalDate createDate) {
+        this.createDate = createDate;
     }
 }
