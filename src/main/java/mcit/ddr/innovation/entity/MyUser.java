@@ -18,20 +18,20 @@ public class MyUser {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
+    
     private String firstname;
 
-    @NotBlank
+    
     private String lastname;
 
-    @NotBlank
+    
     private String fathername;
 
-    @NotBlank
-    @Column(unique = true, nullable = false)
+    
+    @Column(unique = true)
     private String nid;
 
-    @NotBlank
+    
     private String phone;
 
     @Enumerated(EnumType.STRING)

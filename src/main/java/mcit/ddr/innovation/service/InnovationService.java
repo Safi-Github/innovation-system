@@ -143,10 +143,10 @@ public class InnovationService {
         log.setCreatedBy(stateChangedByUser);
         log.setCreatedDate(LocalDate.now());
         log.setInnovation(innovation);
-        reviewRepository.save(log);
+        Review savedLog = reviewRepository.save(log);
 
-        if (log.getStateChangedTo() == InnovStatus.REJECTED) {
-            logger.debug("Innovation status changed to REJECTED.");
+        if (savedLog.getStateChangedTo() == InnovStatus.REJECTED) {
+            System.out.println(savedLog.getStateChangedTo());
         }
 
         // Return the InnovationDTO with the required fields

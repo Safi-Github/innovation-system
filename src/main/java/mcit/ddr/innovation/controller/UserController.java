@@ -81,7 +81,7 @@ public class UserController {
                     value = value.toString().toLowerCase();
                 }
 
-                            // Convert role and literacyLevel to their respective enums
+                // Convert role and literacyLevel to their respective enums
                 if (field.equalsIgnoreCase("role") && value instanceof String) {
                     value = Role.valueOf(((String) value).toUpperCase()); // Convert string to enum
                 }
