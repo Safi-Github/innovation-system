@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.lang.reflect.Field;
@@ -40,6 +41,7 @@ public class UserController {
       this.forgotPasswordService = forgotPasswordService;
   }
 
+  // get all users
    @GetMapping("/users")
    public List<MyUser> getAllUsers() {
       return myUserRepository.findAll();
@@ -50,7 +52,6 @@ public class UserController {
   public Optional<MyUser> getUserById(@PathVariable Long id) {
       return myUserRepository.findById(id);
   }
-
 
   //partial update
   @PatchMapping("/user/{id}")
@@ -111,7 +112,7 @@ public class UserController {
             .noContent()
             .build();
     }
-
+    // endpoint for getting literacy-levels enum
     @GetMapping("/enums/literacy-levels")
     public ResponseEntity<List<Map<String, String>>> getLiteracyLevels() {
         List<Map<String, String>> literacyLevels = Arrays.stream(LiteracyLevel.values())
@@ -121,6 +122,7 @@ public class UserController {
         return ResponseEntity.ok(literacyLevels);
     }
 
+    // endpoint for getting roles enum
     @GetMapping("/enums/roles")
     public ResponseEntity<List<Map<String, String>>> getRoles() {
         List<Map<String, String>> roles = Arrays.stream(Role.values())
@@ -168,14 +170,4 @@ public class UserController {
         // Return a success response
         return ResponseEntity.ok("Password changed successfully.");
     }
-
-
-
-
-
-
-
-
-
-
 }

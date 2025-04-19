@@ -5,6 +5,7 @@ public enum Role {
     ROLE_INNOVATOR("Innovator"),
     ROLE_BOARD_MEMBER("Board Member");
 
+
     private final String displayName;
 
     Role(String displayName) {

@@ -72,6 +72,7 @@ public class SecurityConfiguration {
                     registry.requestMatchers("/api/users/**", "/api/account/**").permitAll();
                     registry.requestMatchers(HttpMethod.GET, "/api/user/{id}").permitAll();
                     registry.requestMatchers(HttpMethod.POST, "/api/**").permitAll();
+                    registry.requestMatchers("/api/verify-email").permitAll();
                     registry.anyRequest().authenticated();
                 })
                 .formLogin(AbstractHttpConfigurer::disable)

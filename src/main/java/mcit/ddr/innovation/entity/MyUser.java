@@ -5,12 +5,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
 import mcit.ddr.innovation.enums.LiteracyLevel;
 import mcit.ddr.innovation.enums.Role;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+@Data
 @Entity
 @Table(name = "users")
 public class MyUser {
@@ -48,7 +50,6 @@ public class MyUser {
     private String username;
 
     @NotBlank
-    //This will prevent `password` from appearing in JSON responses
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
@@ -58,6 +59,7 @@ public class MyUser {
     @Column(columnDefinition = "boolean default true")
     private Boolean isActive = true;
 
+
     @Column(updatable = false)
     private LocalDate createDate;
 
@@ -66,17 +68,15 @@ public class MyUser {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @Column(name = "profile_image")
+    private String profileImage;
 
-    public String getFirstname() {
-        return firstname;
-    }
 
-    public void setFirstname(String firstname) {
-        this.firstname = firstname;
-    }
+//    @Column(columnDefinition = "boolean default false")
+//    private Boolean isEmailVerified = false;
+//
+//    private String emailVerificationToken;
+
 
     public String getLastname() {
         return lastname;
