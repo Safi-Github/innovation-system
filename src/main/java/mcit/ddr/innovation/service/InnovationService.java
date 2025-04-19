@@ -7,6 +7,7 @@ import mcit.ddr.innovation.dto.InnovationSearchCriteriaDTO;
 import mcit.ddr.innovation.dto.InnovationStatusChangeResponseDTO;
 import mcit.ddr.innovation.dto.PartialInnovationUpdateDTO;
 import mcit.ddr.innovation.entity.Innovation;
+// import mcit.ddr.innovation.entity.InnovationHistory;
 import mcit.ddr.innovation.entity.MyUser;
 import mcit.ddr.innovation.entity.Review;
 // import mcit.ddr.innovation.enums.Category;
@@ -14,6 +15,7 @@ import mcit.ddr.innovation.enums.InnovStatus;
 import mcit.ddr.innovation.enums.Role;
 import mcit.ddr.innovation.exception.ResourceNotFoundException;
 import mcit.ddr.innovation.enums.InnovStatus;
+// import mcit.ddr.innovation.repository.InnovationHistoryRepository;
 import mcit.ddr.innovation.repository.InnovationRepository;
 import mcit.ddr.innovation.repository.MyUserRepository;
 import mcit.ddr.innovation.repository.ReviewRepository;
@@ -31,6 +33,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.persistence.EntityNotFoundException;
 
 import org.springframework.data.domain.Page;
@@ -41,6 +46,7 @@ import org.springframework.data.domain.Sort;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -56,6 +62,10 @@ public class InnovationService {
     private final MyUserRepository myUserRepository;
     private final ReviewRepository reviewRepository;
     private final FileStorageService fileStorageService;
+    // private final InnovationHistoryRepository innovationHistoryRepository;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     public Innovation createInnovation(Innovation innovation, MultipartFile attachmentFile) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -147,6 +157,7 @@ public class InnovationService {
 
         if (savedLog.getStateChangedTo() == InnovStatus.REJECTED) {
             System.out.println(savedLog.getStateChangedTo());
+
         }
 
         // Return the InnovationDTO with the required fields

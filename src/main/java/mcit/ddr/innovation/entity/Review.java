@@ -6,6 +6,8 @@ import mcit.ddr.innovation.enums.InnovStatus;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 public class Review {
 
@@ -31,6 +33,10 @@ public class Review {
     @ManyToOne
     @JoinColumn(name = "innovation_id")
     private Innovation innovation;
+    
+    // @OneToOne(mappedBy = "review", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    // @JsonIgnoreProperties("review")
+    // private InnovationHistory innovationHistory;
 
     // Getters and Setters
     public Long getId() {
@@ -88,4 +94,12 @@ public class Review {
     public void setInnovation(Innovation innovation) {
         this.innovation = innovation;
     }
+
+    // public InnovationHistory getInnovationHistory() {
+    //     return innovationHistory;
+    // }
+    
+    // public void setInnovationHistory(InnovationHistory innovationHistory) {
+    //     this.innovationHistory = innovationHistory;
+    // }
 }
