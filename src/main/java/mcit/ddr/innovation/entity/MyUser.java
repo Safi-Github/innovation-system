@@ -5,11 +5,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
 import mcit.ddr.innovation.enums.LiteracyLevel;
 import mcit.ddr.innovation.enums.Role;
 
 import java.time.LocalDateTime;
 
+@Data
 @Entity
 @Table(name = "users")
 public class MyUser {
@@ -47,7 +49,6 @@ public class MyUser {
     private String username;
 
     @NotBlank
-    //This will prevent `password` from appearing in JSON responses
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
@@ -60,108 +61,11 @@ public class MyUser {
     @Column(name = "profile_image")
     private String profileImage;
 
-    // Getters and Setters
-    public String getProfileImage() {
-        return profileImage;
-    }
+//    @Column(columnDefinition = "boolean default false")
+//    private Boolean isEmailVerified = false;
+//
+//    private String emailVerificationToken;
 
-    public void setProfileImage(String profileImage) {
-        this.profileImage = profileImage;
-    }
 
-    public Long getId() {
-        return id;
-    }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getFirstname() {
-        return firstname;
-    }
-
-    public void setFirstname(String firstname) {
-        this.firstname = firstname;
-    }
-
-    public String getLastname() {
-        return lastname;
-    }
-
-    public void setLastname(String lastname) {
-        this.lastname = lastname;
-    }
-
-    public String getFathername() {
-        return fathername;
-    }
-
-    public void setFathername(String fathername) {
-        this.fathername = fathername;
-    }
-
-    public String getNid() {
-        return nid;
-    }
-
-    public void setNid(String nid) {
-        this.nid = nid;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public LiteracyLevel getLiteracyLevel() {
-        return literacyLevel;
-    }
-
-    public void setLiteracyLevel(LiteracyLevel literacyLevel) {
-        this.literacyLevel = literacyLevel;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
-    }
-
-    public Boolean getIsActive() {
-        return isActive;
-    }
-
-    public void setIsActive(Boolean isActive) {
-        this.isActive = isActive;
-    }
 }

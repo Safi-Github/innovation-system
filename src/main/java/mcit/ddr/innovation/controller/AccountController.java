@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import mcit.ddr.innovation.dto.UserProfileDTO;
 import mcit.ddr.innovation.service.FileStorageService;
@@ -15,6 +16,8 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -48,20 +51,30 @@ public class AccountController {
     private MyUserDetailService myUserDetailService;
     @Autowired
     private FileStorageService fileStorageService;
+    @Autowired
+    private JavaMailSender mailSender;
+
 
     public AccountController(MyUserRepository myUserRepository) {
         this.myUserRepository = myUserRepository;
     }
 
-    // @PostMapping("/register")
-    // public MyUser createUser(@RequestBody MyUser user) {
-    //     user.setPassword(passwordEncoder.encode(user.getPassword()));
-    //     return myUserRepository.save(user);
-    // }
-
     @PostMapping("/register")
     public ResponseEntity<?> createUser(@RequestPart("user") MyUser user,
                                         @RequestPart(value = "image", required = false) MultipartFile imageFile) {
+
+//        String token = UUID.randomUUID().toString();
+//        user.setEmailVerificationToken(token);
+//        user.setIsEmailVerified(false);
+//
+//        // Send verification email
+//        String verificationUrl = "http://localhost:8080/api/verify-email?token=" + token;
+//        SimpleMailMessage message = new SimpleMailMessage();
+//        message.setTo(user.getEmail());
+//        message.setSubject("Email Verification - Innovation Management System");
+//        message.setText("Please verify your email by clicking the link: " + verificationUrl);
+//        mailSender.send(message);
+
 
         // Check for existing username
         if (myUserRepository.existsByUsername(user.getUsername().toLowerCase())) {
@@ -98,6 +111,23 @@ public class AccountController {
         return ResponseEntity.ok(savedUser);
     }
 
+//    @GetMapping("/verify-email")
+//    public ResponseEntity<?> verifyEmail(@RequestParam String token) {
+//        Optional<MyUser> userOpt = myUserRepository.findByEmailVerificationToken(token);
+//
+//        if (userOpt.isEmpty()) {
+//            return ResponseEntity.badRequest().body("Invalid verification token.");
+//        }
+//
+//        MyUser user = userOpt.get();
+//        user.setIsEmailVerified(true);
+//        user.setEmailVerificationToken(null); // Clear token after successful verification
+//        myUserRepository.save(user);
+//
+//        return ResponseEntity.ok("Email verified successfully. You can now log in.");
+//    }
+
+
 
     // Endpoint to get the profile details of the logged-in user
     @GetMapping("/profile")
@@ -118,9 +148,6 @@ public class AccountController {
     @PutMapping(value = "/profile", consumes = {"multipart/form-data"})
     public ResponseEntity<UserProfileDTO> updateProfile(
             @RequestHeader("Authorization") String token,
-            @RequestParam("firstname") String firstname,
-            @RequestParam("lastname") String lastname,
-            @RequestParam("phone") String phone,
             @RequestPart(value = "image", required = false) MultipartFile imageFile) {
 
         String username = extractUsernameFromToken(token);
@@ -131,11 +158,6 @@ public class AccountController {
         }
 
         MyUser user = userOpt.get();
-
-        // Update allowed fields only
-        user.setFirstname(firstname);
-        user.setLastname(lastname);
-        user.setPhone(phone);
 
         if (imageFile != null && !imageFile.isEmpty()) {
             String profileImagePath = fileStorageService.saveProfileImage(imageFile, username);
@@ -201,6 +223,11 @@ public class AccountController {
             if (!user.getIsActive()) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("inactive User. Please contact admin.");
             }
+
+//            if (!user.getIsEmailVerified()) {
+//                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Please verify your email before logging in.");
+//            }
+
 
             //generate token
             if (authentication.isAuthenticated()) {
