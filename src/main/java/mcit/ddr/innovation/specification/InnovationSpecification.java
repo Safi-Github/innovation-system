@@ -1,15 +1,34 @@
 package mcit.ddr.innovation.specification;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 import jakarta.persistence.criteria.*;
 import mcit.ddr.innovation.dto.InnovationSearchCriteriaDTO;
 import mcit.ddr.innovation.entity.Innovation;
+import mcit.ddr.innovation.entity.MyUser;
+import mcit.ddr.innovation.repository.MyUserRepository;
 
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class InnovationSpecification {
+    @Autowired
+    private MyUserRepository myUserRepository;  
+    
+    public InnovationSpecification(MyUserRepository myUserRepository) {
+        this.myUserRepository = myUserRepository;
+    }
 
     public static Specification<Innovation> filterByCriteria(InnovationSearchCriteriaDTO criteria) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        boolean isAdmin = authentication.getAuthorities().stream()
+            .map(GrantedAuthority::getAuthority)
+            .anyMatch(role -> role.equals("ROLE_ADMIN"));
         
         return (Root<Innovation> root, CriteriaQuery<?> query, CriteriaBuilder cb) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -52,6 +71,11 @@ public class InnovationSpecification {
             // 🟢 Filter by Created By
             if (criteria.getCreatedBy() != null) {
                 predicates.add(cb.equal(root.get("createdBy"), criteria.getCreatedBy()));
+            }
+
+            // 🔴 Exclude drafts IF user is admin
+            if (isAdmin) {
+                predicates.add(cb.notEqual(root.get("status"), "DRAFT"));
             }
 
             // 🟢 Sorting: Most Recent First

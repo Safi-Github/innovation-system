@@ -130,6 +130,8 @@ public class AccountController {
 
 
     // Endpoint to get the profile details of the logged-in user
+    //as i think now this api is not needed because now the api: /profile/image/{username} created
+    //and also the dto we was created for the user profile also not needed now
     @GetMapping("/profile")
     public ResponseEntity<UserProfileDTO> getProfile(@RequestHeader("Authorization") String token) {
         String username = extractUsernameFromToken(token);
@@ -144,7 +146,7 @@ public class AccountController {
 
 
 
-    // Endpoint to update the user's profile (including image)
+    // Endpoint to update the user's profile image
     @PutMapping(value = "/profile", consumes = {"multipart/form-data"})
     public ResponseEntity<UserProfileDTO> updateProfile(
             @RequestHeader("Authorization") String token,
