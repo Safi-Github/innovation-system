@@ -2,66 +2,75 @@ package mcit.ddr.innovation.service;
 
 import java.io.IOException;
 import java.nio.file.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+
 import mcit.ddr.innovation.exception.FileStorageException;
 
 @Service
 public class FileStorageService {
 
-    private final Path fileStorageLocation;
+    private final Path profileImageStorageLocation;
+    private final Path attachmentFileStorageLocation;
 
-    @Autowired
     public FileStorageService() {
-        // Specify the directory where you want to store the uploaded files
-        this.fileStorageLocation = Paths.get("D:\\DDR\\innovation\\user-profile").toAbsolutePath().normalize();
+        this.profileImageStorageLocation = Paths.get("D:\\DDR\\innovation\\user-profile").toAbsolutePath().normalize();
+        this.attachmentFileStorageLocation = Paths.get("D:\\DDR\\innovation\\attachmentFile").toAbsolutePath().normalize();
+
         try {
-            // Create the directory if it doesn't exist
-            Files.createDirectories(this.fileStorageLocation);
+            Files.createDirectories(this.profileImageStorageLocation);
+            Files.createDirectories(this.attachmentFileStorageLocation);
         } catch (Exception ex) {
-            throw new FileStorageException("Could not create the directory to store files", ex);
+            throw new FileStorageException("Could not create directories for file storage", ex);
         }
     }
 
     public String saveProfileImage(MultipartFile file, String username) {
         String extension = StringUtils.getFilenameExtension(file.getOriginalFilename());
-        String fileName = "profile_" + username + "." + extension;
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        String fileName = "profile_" + username + "_" + timestamp + "." + extension;
 
         try {
-            Path targetLocation = this.fileStorageLocation.resolve(fileName);
+            Path targetLocation = this.profileImageStorageLocation.resolve(fileName);
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
-            return targetLocation.toString(); // or relative path like: "uploads/profile_username.jpg"
+            return targetLocation.toString();
         } catch (IOException ex) {
             throw new FileStorageException("Could not store profile image for " + username, ex);
         }
     }
 
-
-
     public String saveFile(MultipartFile file) {
-        // Clean the file name to remove any unwanted characters
-        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+        String extension = StringUtils.getFilenameExtension(file.getOriginalFilename());
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        String baseName = StringUtils.cleanPath(file.getOriginalFilename()).replace("." + extension, "");
+
+        // Truncate the base name to 10 characters (to prevent overly long names)
+        String safeBaseName = baseName.length() > 10 ? baseName.substring(0, 10) : baseName;
+
+        // Combine base name with timestamp
+        String fileName = safeBaseName + "_" + timestamp + "." + extension;
+
         try {
-            // Define the file path where the file will be stored
-            Path targetLocation = this.fileStorageLocation.resolve(fileName);
-            // Copy the file to the target location, replacing any existing file
+            Path targetLocation = this.attachmentFileStorageLocation.resolve(fileName);
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
-            // Return the file path as a string
             return targetLocation.toString();
         } catch (IOException ex) {
-            throw new FileStorageException("Could not store file " + fileName, ex);
+            throw new FileStorageException("Could not store file " + file.getOriginalFilename(), ex);
         }
     }
+
 
     public void deleteFile(String filePath) {
         try {
             Path pathToDelete = Paths.get(filePath).toAbsolutePath().normalize();
-            Files.deleteIfExists(pathToDelete);  // Delete the file if it exists
+            Files.deleteIfExists(pathToDelete);
         } catch (IOException ex) {
             throw new FileStorageException("Could not delete file at " + filePath, ex);
         }
     }
-
 }

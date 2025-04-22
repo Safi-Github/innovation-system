@@ -63,6 +63,7 @@ public class InnovationService {
     private final ReviewRepository reviewRepository;
     private final FileStorageService fileStorageService;
     // private final InnovationHistoryRepository innovationHistoryRepository;
+    private final NotificationService notificationService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -128,7 +129,6 @@ public class InnovationService {
     }
 
 
-    //innovation status change service
     @Transactional
     public InnovationStatusChangeResponseDTO updateInnovationStatus(Long id, Map<String, String> payload) {
         Innovation innovation = innovationRepository.findById(id)
@@ -139,37 +139,66 @@ public class InnovationService {
             throw new IllegalArgumentException("New Status Param is required");
         }
 
-        // Update Innovation Status
-        innovation.setStatus(InnovStatus.valueOf(statusValue.toUpperCase()));
+        // Update status
+        InnovStatus newStatus = InnovStatus.valueOf(statusValue.toUpperCase());
+        innovation.setStatus(newStatus);
         innovationRepository.save(innovation);
 
-        // Create a log entry
+        // Log the status change
         MyUser stateChangedByUser = myUserRepository.findById(Long.parseLong(payload.get("commentedBy")))
                 .orElseThrow(() -> new ResourceNotFoundException("User Not Exist"));
 
         Review log = new Review();
-        log.setStateChangedTo(InnovStatus.valueOf(statusValue.toUpperCase()));
+        log.setStateChangedTo(newStatus);
         log.setComment(payload.get("comment"));
         log.setCreatedBy(stateChangedByUser);
         log.setCreatedDate(LocalDate.now());
         log.setInnovation(innovation);
         Review savedLog = reviewRepository.save(log);
 
-        if (savedLog.getStateChangedTo() == InnovStatus.REJECTED) {
-            System.out.println(savedLog.getStateChangedTo());
+        // Create frontend URL
+        String contentUrl = "http://your-frontend.com/innovations/" + innovation.getId();
 
+        // Notify the innovator in all cases
+        notificationService.sendNotification(
+                innovation.getCreatedBy().getId(),
+                "Your innovation titled \"" + innovation.getTitle() + "\" has been updated to status: " + newStatus,
+                contentUrl
+        );
+
+        // Notify board member if status is ASSIGNED, RESUBMITTED, or APPROVED
+        if ((newStatus == InnovStatus.ASSIGNED || newStatus == InnovStatus.RESUBMITTED || newStatus == InnovStatus.APPROVED)
+                && innovation.getBoardMember() != null) {
+            notificationService.sendNotification(
+                    innovation.getBoardMember().getId(),
+                    "An innovation titled \"" + innovation.getTitle() + "\" has been " + newStatus.name().toLowerCase() + " to you.",
+                    contentUrl
+            );
         }
 
-        // Return the InnovationDTO with the required fields
+        // Notify all admins when status is SUBMITTED or APPROVED
+        if (newStatus == InnovStatus.SUBMITTED || newStatus == InnovStatus.APPROVED) {
+            List<MyUser> admins = myUserRepository.findByRole(Role.ROLE_ADMIN);
+            for (MyUser admin : admins) {
+                notificationService.sendNotification(
+                        admin.getId(),
+                        "Innovation titled \"" + innovation.getTitle() + "\" has been " + newStatus.name().toLowerCase() + ".",
+                        contentUrl
+                );
+            }
+        }
+
+
         return new InnovationStatusChangeResponseDTO(
-            innovation.getId(),
-            innovation.getTitle(),
-            innovation.getStatus(),
-            stateChangedByUser,  // state changed by the user
-            log.getCreatedDate(),  // created on date
-            log.getComment()
+                innovation.getId(),
+                innovation.getTitle(),
+                innovation.getStatus(),
+                stateChangedByUser,
+                log.getCreatedDate(),
+                log.getComment()
         );
     }
+
 
 
     //innovation assignment service
@@ -220,6 +249,22 @@ public class InnovationService {
         //         boardMember.getId(),
         //         "You have been assigned an innovation: " + innovation.getTitle() + innovationId
         // );
+
+
+        String innovationUrl = "http://your-frontend.com/innovations/" + innovation.getId();
+
+        notificationService.sendNotification(
+                boardMember.getId(),
+                "A new innovation titled \"" + innovation.getTitle() + "\" has been assigned to you.",
+                innovationUrl
+        );
+
+        notificationService.sendNotification(
+                innovation.getCreatedBy().getId(),
+                "Your innovation titled \"" + innovation.getTitle() + "\" has been assigned to a board member.",
+                innovationUrl
+        );
+
 
         // Return assignment response DTO
         return new InnovationAssignmentResponseDTO(

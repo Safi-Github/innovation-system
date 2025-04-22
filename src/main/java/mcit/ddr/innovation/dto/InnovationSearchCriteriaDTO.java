@@ -1,5 +1,6 @@
 package mcit.ddr.innovation.dto;
 
+import lombok.Data;
 import mcit.ddr.innovation.entity.MyUser;
 // import mcit.ddr.innovation.enums.Category;
 import mcit.ddr.innovation.enums.InnovStatus;
@@ -10,6 +11,7 @@ import java.util.Date;
 
 @Getter
 @Setter
+@Data
 public class InnovationSearchCriteriaDTO {
     private String category;
     private InnovStatus status;
