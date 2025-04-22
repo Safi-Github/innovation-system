@@ -18,8 +18,11 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<ReviewAssigneesLogsResponseDTO> findReviewAssignedLogs(@Param("innovationId") Long innovationId);
 
     // the innovation all logs
-    @Query("SELECT new mcit.ddr.innovation.dto.ReviewLogsResponseDTO(" +
-        "r.id, r.stateChangedTo, r.createdBy, r.createdDate, r.comment) " +
-        "FROM Review r WHERE r.innovation.id = :innovationId")
-    List<ReviewLogsResponseDTO> findReviewLogs(@Param("innovationId") Long innovationId);
+    // @Query("SELECT new mcit.ddr.innovation.dto.ReviewLogsResponseDTO(" +
+    //     "r.id, r.stateChangedTo, r.createdBy, r.createdDate, r.comment,r.innovationHistory) " +
+    //     "FROM Review r WHERE r.innovation.id = :innovationId")
+    // List<ReviewLogsResponseDTO> findReviewLogs(@Param("innovationId") Long innovationId);
+
+    @Query("SELECT r FROM Review r WHERE r.innovation.id = :innovationId")
+    List<Review> findReviewLogs(@Param("innovationId") Long innovationId);
 }

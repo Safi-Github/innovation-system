@@ -7,7 +7,7 @@ import mcit.ddr.innovation.dto.InnovationSearchCriteriaDTO;
 import mcit.ddr.innovation.dto.InnovationStatusChangeResponseDTO;
 import mcit.ddr.innovation.dto.PartialInnovationUpdateDTO;
 import mcit.ddr.innovation.entity.Innovation;
-// import mcit.ddr.innovation.entity.InnovationHistory;
+import mcit.ddr.innovation.entity.InnovationHistory;
 import mcit.ddr.innovation.entity.MyUser;
 import mcit.ddr.innovation.entity.Review;
 // import mcit.ddr.innovation.enums.Category;
@@ -15,7 +15,7 @@ import mcit.ddr.innovation.enums.InnovStatus;
 import mcit.ddr.innovation.enums.Role;
 import mcit.ddr.innovation.exception.ResourceNotFoundException;
 import mcit.ddr.innovation.enums.InnovStatus;
-// import mcit.ddr.innovation.repository.InnovationHistoryRepository;
+import mcit.ddr.innovation.repository.InnovationHistoryRepository;
 import mcit.ddr.innovation.repository.InnovationRepository;
 import mcit.ddr.innovation.repository.MyUserRepository;
 import mcit.ddr.innovation.repository.ReviewRepository;
@@ -62,7 +62,7 @@ public class InnovationService {
     private final MyUserRepository myUserRepository;
     private final ReviewRepository reviewRepository;
     private final FileStorageService fileStorageService;
-    // private final InnovationHistoryRepository innovationHistoryRepository;
+    private final InnovationHistoryRepository innovationHistoryRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -157,6 +157,35 @@ public class InnovationService {
 
         if (savedLog.getStateChangedTo() == InnovStatus.REJECTED) {
             System.out.println(savedLog.getStateChangedTo());
+
+            try {
+                // Convert the rejected innovation to JSON
+                Map<String, Object> snapshot = new HashMap<>();
+                snapshot.put("id", innovation.getId());
+                snapshot.put("title", innovation.getTitle());
+                snapshot.put("purpose", innovation.getPurpose());
+                snapshot.put("category", innovation.getCategory());
+                snapshot.put("description", innovation.getDescription());
+                snapshot.put("additionalInfo", innovation.getAdditionalInfo());
+                snapshot.put("reasonsProvingYouCanInvent", innovation.getReasonsProvingYouCanInvent());
+                snapshot.put("impact", innovation.getImpact());
+                snapshot.put("resourcesNeeded", innovation.getResourcesNeeded());
+                snapshot.put("attachment", innovation.getAttachment());
+
+                String innovationJson = objectMapper.writeValueAsString(snapshot);
+                System.out.println(innovationJson);
+
+                InnovationHistory innovHistory = new InnovationHistory();
+                innovHistory.setArchivedInnovationData(innovationJson);
+                innovHistory.setDateCreated(LocalDate.now());
+                innovHistory.setReview(savedLog);
+                innovHistory.setInnovation(innovation);
+                innovationHistoryRepository.save(innovHistory);
+
+                } catch (JsonProcessingException e) {
+                logger.error("Failed to convert innovation to JSON for history log", e);
+                // Optionally, throw or handle
+                }
 
         }
 
