@@ -32,7 +32,8 @@ public class Innovation {
 
     private String purpose;
 
- 
+
+    // category is now an entity it should replace
     private String category;
 
     @Column(columnDefinition = "TEXT")
