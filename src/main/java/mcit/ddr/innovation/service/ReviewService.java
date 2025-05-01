@@ -29,11 +29,10 @@ public class ReviewService {
     
     public List<ReviewLogsResponseDTO> getReviews(Long innovationId) {
         List<Review> reviews = reviewRepository.findReviewLogs(innovationId);
-    
+
         return reviews.stream()
             .map(r -> {
                 InnovationHistoryResponseDTO parsedData = null;
-    
                 try {
                     if (r.getInnovationHistory() != null && r.getInnovationHistory().getArchivedInnovationData() != null) {
                         parsedData = objectMapper.readValue(
@@ -41,36 +40,34 @@ public class ReviewService {
                             InnovationHistoryResponseDTO.class
                         );
                     }
-                } catch (JsonProcessingException e) {
-                    e.printStackTrace(); // Log better in production
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-    
-                InnovationHistoryResponseDTO historyDTO = null;
-                if (r.getInnovationHistory() != null && parsedData != null) {
-                    // Check if the ID is null, and if so, skip passing it
-                Long innovationHistoryId = r.getInnovationHistory().getId() != null ? r.getInnovationHistory().getId() : null;
-                    historyDTO = new InnovationHistoryResponseDTO(
-                        innovationHistoryId,
-                        parsedData.getTitle(),
-                        parsedData.getPurpose(),
-                        parsedData.getCategory(),
-                        parsedData.getDescription(),
-                        parsedData.getAdditionalInfo(),
-                        parsedData.getReasonsProvingYouCanInvent(),
-                        parsedData.getImpact(),
-                        parsedData.getResourcesNeeded(),
-                        parsedData.getAttachment()
-                    );
-                }
-    
+
                 return new ReviewLogsResponseDTO(
-                    r.getId(),
-                    r.getStateChangedTo(),
-                    r.getCreatedBy(),
-                    r.getCreatedDate(),
-                    r.getComment(),
-                    historyDTO
-                );
+    r.getId(),
+    r.getStateChangedTo(),
+    r.getCreatedBy(),
+    r.getCreatedDate(),
+    r.getComment(),
+    r.getInnovationHistory() != null && parsedData != null
+        ? new InnovationHistoryResponseDTO(
+            r.getInnovationHistory().getId(),
+            parsedData.getTitle(),
+            parsedData.getPurpose(),
+            parsedData.getCategory(),
+            parsedData.getDescription(),
+            parsedData.getAdditionalInfo(),
+            parsedData.getReasonsProvingYouCanInvent(),
+            parsedData.getImpact(),
+            parsedData.getResourcesNeeded(),
+            parsedData.getAttachment(),
+            r.getInnovationHistory().getDateCreated(),
+            null // don't include archivedInnovationData in the response
+        )
+        : null
+);
+
             })
             .collect(Collectors.toList());
     }

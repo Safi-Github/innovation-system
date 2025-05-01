@@ -31,14 +31,20 @@ public class FileDownloadService {
             }
     
             Innovation fileRecord = fileRecordOpt.get();
-            if (fileRecord.getAttachment() == null || fileRecord.getAttachment().isEmpty()) {
+            String attachmentPath = fileRecord.getAttachment();
+    
+            // Ensure the attachment path does not include the base directory if it already has it
+            String fileName = attachmentPath.replace("D:\\DDR\\innovation\\attachmentFile\\", "");
+    
+            if (fileName.isEmpty()) {
                 throw new FileStorageException("No attachment filename found for record ID: " + id);
             }
     
-            Path filePath = fileStorageLocation.resolve(fileRecord.getAttachment()).normalize();
+            Path filePath = fileStorageLocation.resolve(fileName).normalize();
             Resource resource = new UrlResource(filePath.toUri());
+    
             if (!resource.exists() || !resource.isReadable()) {
-                throw new FileStorageException("File does not exist or is not readable: " + fileRecord.getAttachment());
+                throw new FileStorageException("File does not exist or is not readable: " + fileName);
             }
     
             return resource;
