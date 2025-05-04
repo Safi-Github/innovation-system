@@ -63,6 +63,7 @@ public class InnovationService {
     private final ReviewRepository reviewRepository;
     private final FileStorageService fileStorageService;
     private final InnovationHistoryRepository innovationHistoryRepository;
+    private final NotificationService notificationService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -189,6 +190,25 @@ public class InnovationService {
 
         }
 
+        String contentUrlInnovator = "http://localhost:3000/dashboard/innovator/review/" + innovation.getId();
+        String contentUrlBoardMember = "http://localhost:3000/dashboard/boardmember/review/" + innovation.getId();
+        if (savedLog.getStateChangedTo() == InnovStatus.APPROVED || savedLog.getStateChangedTo() == InnovStatus.REJECTED) {
+            notificationService.sendNotification(
+            innovation.getCreatedBy().getId(),
+            "Your Innovation Tittled \"" + innovation.getTitle() + "\" has been " + savedLog.getStateChangedTo().name().toLowerCase() + "",
+            contentUrlInnovator
+            );
+        }
+
+        if (savedLog.getStateChangedTo() == InnovStatus.RESUBMITTED && innovation.getBoardMember()!=null) {
+            notificationService.sendNotification(
+            innovation.getCreatedBy().getId(),
+            "Innovation Tittled \"" + innovation.getTitle() + "\" has been " + savedLog.getStateChangedTo().name().toLowerCase() + "to You",
+            contentUrlBoardMember
+            );
+        }
+        
+
         // Return the InnovationDTO with the required fields
         return new InnovationStatusChangeResponseDTO(
             innovation.getId(),
@@ -233,7 +253,25 @@ public class InnovationService {
         log.setComment(comment);
         log.setAssignedTo(boardMember);
         log.setInnovation(innovation);
-        reviewRepository.save(log);
+        Review savedLog = reviewRepository.save(log);
+
+        String contentUrlInnovator = "http://localhost:3000/dashboard/innovator/review/" + innovation.getId();
+        String contentUrlBoardMember = "http://localhost:3000/dashboard/boardmember/review/" + innovation.getId();
+        if (savedLog.getStateChangedTo() == InnovStatus.ASSIGNED) {
+
+            notificationService.sendNotification(
+            innovation.getCreatedBy().getId(),
+            "Your Innovation Tittled \"" + innovation.getTitle() + "\" has been " + savedLog.getStateChangedTo().name().toLowerCase() + "",
+            contentUrlInnovator
+            );
+            if(innovation.getBoardMember() !=null){
+                notificationService.sendNotification(
+                innovation.getBoardMember().getId(),
+                "Innovation Tittled \"" + innovation.getTitle() + "\" has been " + savedLog.getStateChangedTo().name().toLowerCase() + "to You",
+                contentUrlBoardMember
+                );
+            }
+        }
 
         if (log.getStateChangedTo() == InnovStatus.REJECTED) {
             logger.debug("Innovation status changed to REJECTED.");
