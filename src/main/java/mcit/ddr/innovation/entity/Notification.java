@@ -25,7 +25,6 @@ public class Notification {
     @JoinColumn(name = "notifying_user_id")
     private MyUser notifyingUser;
 
-
     public Notification() {
         this.createdAt = LocalDateTime.now();
     }

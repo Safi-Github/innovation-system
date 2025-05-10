@@ -71,9 +71,14 @@ public class Innovation {
     @JoinColumn(name = "assigner_id")
     private MyUser assigner;
 
-    @ManyToOne
-    @JoinColumn(name = "board_member_id")
-    private MyUser boardMember;
+//    @ManyToOne
+//    @JoinColumn(name = "board_member_id")
+//    private MyUser boardMember;
+
+    @OneToOne
+    @JoinColumn(name = "committee_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "members"})
+    private Committee committee;
 
     // Audit fields
     @CreatedBy

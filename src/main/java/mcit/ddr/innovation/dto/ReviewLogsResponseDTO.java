@@ -23,6 +23,6 @@ public class ReviewLogsResponseDTO{
     private MyUser createdBy;
     private LocalDate createdDate;
     private String comment;
-    @JsonProperty("previous_submission")
-    private InnovationHistoryResponseDTO innovationHistoryResponseDTO;
+//    @JsonProperty("previous_submission")
+//    private InnovationHistoryResponseDTO innovationHistoryResponseDTO;
 }

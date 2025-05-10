@@ -1,6 +1,9 @@
 package mcit.ddr.innovation.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -11,6 +14,8 @@ import mcit.ddr.innovation.enums.Role;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Entity
@@ -63,6 +68,12 @@ public class MyUser {
     @Column(updatable = false)
     private LocalDate createDate;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore // ← Optional: Prevents user → committeeMemberships → committee → createdBy
+    private List<CommitteeMember> committeeMemberships = new ArrayList<>();
+
+
+
     // Getters and Setters
     public Long getId() {
         return id;
@@ -71,12 +82,10 @@ public class MyUser {
     @Column(name = "profile_image")
     private String profileImage;
 
-
 //    @Column(columnDefinition = "boolean default false")
 //    private Boolean isEmailVerified = false;
 //
 //    private String emailVerificationToken;
-
 
     public String getLastname() {
         return lastname;
