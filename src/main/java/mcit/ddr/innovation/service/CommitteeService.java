@@ -6,6 +6,8 @@ import mcit.ddr.innovation.entity.MyUser;
 import mcit.ddr.innovation.repository.CommitteeRepository;
 import mcit.ddr.innovation.repository.MyUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,8 +31,14 @@ public class CommitteeService {
         committee.setCreatedDate(LocalDate.now()); // Assuming you have a field createdDate
         committee.setIsClosed(false); // Default value
 
-        MyUser creator = userRepository.findById(dto.getCreatedById())
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + dto.getCreatedById()));
+//        MyUser creator = userRepository.findById(dto.getCreatedById())
+//                .orElseThrow(() -> new RuntimeException("User not found with id: " + dto.getCreatedById()));
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+
+        MyUser creator = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
         committee.setCreatedBy(creator);
 
         return committeeRepository.save(committee);
