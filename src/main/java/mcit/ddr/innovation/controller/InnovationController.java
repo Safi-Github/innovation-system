@@ -1,38 +1,28 @@
 package mcit.ddr.innovation.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import mcit.ddr.innovation.dto.InnovationAssignmentResponseDTO;
 import mcit.ddr.innovation.dto.InnovationPaginatedResponseDTO;
-// import mcit.ddr.innovation.dto.InnovationDTO;
 import mcit.ddr.innovation.dto.InnovationSearchCriteriaDTO;
 import mcit.ddr.innovation.dto.InnovationStatusChangeResponseDTO;
 import mcit.ddr.innovation.dto.PartialInnovationUpdateDTO;
 import mcit.ddr.innovation.entity.Innovation;
-import mcit.ddr.innovation.entity.MyUser;
-import mcit.ddr.innovation.entity.Review;
-// import mcit.ddr.innovation.enums.Category;
-import mcit.ddr.innovation.enums.InnovStatus;
 import mcit.ddr.innovation.repository.InnovationRepository;
 import mcit.ddr.innovation.repository.ReviewRepository;
 import mcit.ddr.innovation.repository.MyUserRepository;
 import mcit.ddr.innovation.exception.FileStorageException;
 import mcit.ddr.innovation.exception.FileValidationException;
-import mcit.ddr.innovation.exception.ResourceNotFoundException;
 import mcit.ddr.innovation.service.FileDownloadService;
 import mcit.ddr.innovation.service.InnovationService;
-import java.util.Date;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import mcit.ddr.innovation.service.SecurityUtilService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
-
 import org.springframework.data.domain.Page;
 
 import java.io.IOException;
@@ -62,35 +52,74 @@ public class InnovationController {
     private MyUserRepository myUserRepository;
     private final InnovationService innovationService;
     private final FileDownloadService fileDownloadService;
+    private final ObjectMapper objectMapper;
 
-    public InnovationController(InnovationRepository innovationRepository,ReviewRepository reviewRepository,MyUserRepository myUserRepository, InnovationService innovationService,FileDownloadService fileDownloadService) {
+
+    public InnovationController(InnovationRepository innovationRepository,ReviewRepository reviewRepository,MyUserRepository myUserRepository, InnovationService innovationService,FileDownloadService fileDownloadService,ObjectMapper objectMapper) {
         this.innovationRepository = innovationRepository;
         this.reviewRepository = reviewRepository;
         this.myUserRepository = myUserRepository;
         this.innovationService = innovationService;
         this.fileDownloadService = fileDownloadService;
+        this.objectMapper = objectMapper;
     }
+//
+//    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public ResponseEntity<?> createInnovation(@Valid @RequestPart("innovation") Innovation innovation,
+//        @RequestPart(value = "attachmentFile", required = false) MultipartFile attachmentFile) {
+//        // Validate file type before saving innovation
+//        if (attachmentFile != null && !attachmentFile.isEmpty()) {
+//            String originalFileName = attachmentFile.getOriginalFilename();
+//            long fileSize = attachmentFile.getSize();
+//            long maxSize = 3 * 1024 * 1024; // 3 MB in bytes
+//
+//            // Ensure the file has a .pdf extension (case insensitive)
+//            if (originalFileName != null && !originalFileName.toLowerCase().endsWith(".pdf")) {
+//                throw new FileValidationException("Only PDF files are allowed!");
+//            }
+//            // Ensure the file size is less than 3MB
+//            if (fileSize > maxSize) {
+//                throw new FileValidationException("File size must be less than 3MB!");
+//            }
+//        }
+//        Innovation createdInnovation = innovationService.createInnovation(innovation,attachmentFile);
+//        return ResponseEntity.ok(createdInnovation);
+//    }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> createInnovation(@Valid @RequestPart("innovation") Innovation innovation,
-        @RequestPart(value = "attachmentFile", required = false) MultipartFile attachmentFile) {
-        // Validate file type before saving innovation
-        if (attachmentFile != null && !attachmentFile.isEmpty()) {
-            String originalFileName = attachmentFile.getOriginalFilename();
-            long fileSize = attachmentFile.getSize();
-            long maxSize = 3 * 1024 * 1024; // 3 MB in bytes
-        
-            // Ensure the file has a .pdf extension (case insensitive)
-            if (originalFileName != null && !originalFileName.toLowerCase().endsWith(".pdf")) {
-                throw new FileValidationException("Only PDF files are allowed!");
+    public ResponseEntity<?> addInnovation(
+            @RequestPart("innovation") String innovationJson,
+            @RequestPart(value = "attachmentFile", required = false) MultipartFile file
+    ) {
+        try {
+            // Validate file type before saving innovation
+            if (file != null && !file.isEmpty()) {
+                String originalFileName = file.getOriginalFilename();
+                long fileSize = file.getSize();
+                long maxSize = 3 * 1024 * 1024; // 3 MB in bytes
+
+                // Ensure the file has a .pdf extension (case insensitive)
+                if (originalFileName != null && !originalFileName.toLowerCase().endsWith(".pdf")) {
+                    throw new FileValidationException("Only PDF files are allowed!");
+                }
+                // Ensure the file size is less than 3MB
+                if (fileSize > maxSize) {
+                    throw new FileValidationException("File size must be less than 3MB!");
+                }
             }
-            // Ensure the file size is less than 3MB
-            if (fileSize > maxSize) {
-                throw new FileValidationException("File size must be less than 3MB!");
-            }
+
+            // Convert JSON string to Innovation entity
+            Innovation innovation = objectMapper.readValue(innovationJson, Innovation.class);
+
+            // Delegate to service
+            Innovation createdInnovation = innovationService.createInnovation(innovation, file);
+            return ResponseEntity.ok(createdInnovation);
+
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to add innovation: " + e.getMessage());
         }
-        Innovation createdInnovation = innovationService.createInnovation(innovation,attachmentFile);
-        return ResponseEntity.ok(createdInnovation);
     }
 
     // partial innovation update endpoint
@@ -126,11 +155,11 @@ public class InnovationController {
     @PutMapping("/assign/{id}")
     public ResponseEntity<InnovationAssignmentResponseDTO> assignInnovation(@PathVariable Long id,@RequestBody Map<String, String> payload ) {
         Long assignerId = Long.parseLong(payload.get("assignerId"));
-        Long boardMemberId = Long.parseLong(payload.get("boardMemberId"));
+        Long committeeId = Long.parseLong(payload.get("committeeId"));
         String statusValue = payload.get("status");
         String comment = payload.get("comment");
 
-        InnovationAssignmentResponseDTO updatedInnovation = innovationService.assignInnovation(id, assignerId, boardMemberId, statusValue, comment);
+        InnovationAssignmentResponseDTO updatedInnovation = innovationService.assignInnovation(id, assignerId, committeeId, statusValue, comment);
         return ResponseEntity.ok(updatedInnovation);
     }
 

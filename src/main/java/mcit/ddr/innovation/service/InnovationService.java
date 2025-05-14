@@ -1,25 +1,18 @@
 package mcit.ddr.innovation.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import mcit.ddr.innovation.dto.InnovationAssignmentResponseDTO;
-// import mcit.ddr.innovation.dto.InnovationDTO;
 import mcit.ddr.innovation.dto.InnovationSearchCriteriaDTO;
 import mcit.ddr.innovation.dto.InnovationStatusChangeResponseDTO;
 import mcit.ddr.innovation.dto.PartialInnovationUpdateDTO;
-import mcit.ddr.innovation.entity.Innovation;
-import mcit.ddr.innovation.entity.InnovationHistory;
-import mcit.ddr.innovation.entity.MyUser;
-import mcit.ddr.innovation.entity.Review;
-// import mcit.ddr.innovation.enums.Category;
+import mcit.ddr.innovation.entity.*;
 import mcit.ddr.innovation.enums.InnovStatus;
 import mcit.ddr.innovation.enums.Role;
 import mcit.ddr.innovation.exception.ResourceNotFoundException;
-import mcit.ddr.innovation.enums.InnovStatus;
-import mcit.ddr.innovation.repository.InnovationHistoryRepository;
-import mcit.ddr.innovation.repository.InnovationRepository;
-import mcit.ddr.innovation.repository.MyUserRepository;
-import mcit.ddr.innovation.repository.ReviewRepository;
+import mcit.ddr.innovation.repository.*;
 import mcit.ddr.innovation.service.FileStorageService;
+import mcit.ddr.innovation.service.NotificationService;
 import mcit.ddr.innovation.specification.InnovationSpecification;
 
 import org.slf4j.Logger;
@@ -33,23 +26,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.persistence.EntityNotFoundException;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -58,12 +44,12 @@ public class InnovationService {
 
     private static final Logger logger = LoggerFactory.getLogger(InnovationService.class);
     private final InnovationRepository innovationRepository;
-    // private final NotificationService notificationService;
     private final MyUserRepository myUserRepository;
     private final ReviewRepository reviewRepository;
     private final FileStorageService fileStorageService;
     private final InnovationHistoryRepository innovationHistoryRepository;
     private final NotificationService notificationService;
+    private final CommitteeRepository committeeRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -75,24 +61,21 @@ public class InnovationService {
                 .orElseThrow(() -> new RuntimeException("User not found: " + username));
 
         innovation.setCreateDate(new Date());
-        // innovation.setLastModifiedDate(new Date());
         innovation.setIsAssigned(false);
         innovation.setStatus(InnovStatus.DRAFT);
         innovation.setCreatedBy(currentUser);
 
         if (attachmentFile != null && !attachmentFile.isEmpty()) {
             String filePath = fileStorageService.saveFile(attachmentFile);
-            innovation.setAttachment(filePath); // Set file path to bill object
+            innovation.setAttachment(filePath);
         }
         return innovationRepository.save(innovation);
     }
 
-    // partial update the innovation
     public Innovation partialUpdateInnovation(Long innovationId, PartialInnovationUpdateDTO partialUpdateDTO, MultipartFile attachmentFile) {
         Innovation innovation = innovationRepository.findById(innovationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Innovation not found"));
 
-        // Update only the fields present in the DTO, excluding status
         if (partialUpdateDTO.getTitle() != null) {
             innovation.setTitle(partialUpdateDTO.getTitle());
         }
@@ -118,18 +101,14 @@ public class InnovationService {
             innovation.setResourcesNeeded(partialUpdateDTO.getResourcesNeeded());
         }
 
-        // If a new attachment file is provided, handle the file upload
         if (attachmentFile != null && !attachmentFile.isEmpty()) {
-            String filePath = fileStorageService.saveFile(attachmentFile); // Use your existing file storage service
-            innovation.setAttachment(filePath); // Update the file path in the Innovation entity
+            String filePath = fileStorageService.saveFile(attachmentFile);
+            innovation.setAttachment(filePath);
         }
 
-        // Save the updated innovation object
         return innovationRepository.save(innovation);
     }
-
-
-    //innovation status change service
+    //Innovation Status Change Service
     @Transactional
     public InnovationStatusChangeResponseDTO updateInnovationStatus(Long id, Map<String, String> payload) {
         Innovation innovation = innovationRepository.findById(id)
@@ -140,110 +119,103 @@ public class InnovationService {
             throw new IllegalArgumentException("New Status Param is required");
         }
 
-        // Update Innovation Status
-        innovation.setStatus(InnovStatus.valueOf(statusValue.toUpperCase()));
+        InnovStatus newStatus = InnovStatus.valueOf(statusValue.toUpperCase());
+        innovation.setStatus(newStatus);
         innovationRepository.save(innovation);
 
-        // Create a log entry
         MyUser stateChangedByUser = myUserRepository.findById(Long.parseLong(payload.get("commentedBy")))
                 .orElseThrow(() -> new ResourceNotFoundException("User Not Exist"));
 
         Review log = new Review();
-        log.setStateChangedTo(InnovStatus.valueOf(statusValue.toUpperCase()));
+        log.setStateChangedTo(newStatus);
         log.setComment(payload.get("comment"));
         log.setCreatedBy(stateChangedByUser);
         log.setCreatedDate(LocalDate.now());
         log.setInnovation(innovation);
         Review savedLog = reviewRepository.save(log);
 
-        if (savedLog.getStateChangedTo() == InnovStatus.REJECTED) {
-            System.out.println(savedLog.getStateChangedTo());
+//      innovation history versioning part commented
+//        if (savedLog.getStateChangedTo() == InnovStatus.REJECTED) {
+//            System.out.println(savedLog.getStateChangedTo());
+//            try {
+//                // Convert the rejected innovation to JSON
+//                Map<String, Object> snapshot = new HashMap<>();
+//                snapshot.put("id", innovation.getId());
+//                snapshot.put("title", innovation.getTitle());
+//                snapshot.put("purpose", innovation.getPurpose());
+//                snapshot.put("category", innovation.getCategory());
+//                snapshot.put("description", innovation.getDescription());
+//                snapshot.put("additionalInfo", innovation.getAdditionalInfo());
+//                snapshot.put("reasonsProvingYouCanInvent", innovation.getReasonsProvingYouCanInvent());
+//                snapshot.put("impact", innovation.getImpact());
+//                snapshot.put("resourcesNeeded", innovation.getResourcesNeeded());
+//                snapshot.put("attachment", innovation.getAttachment());
+//
+//                String innovationJson = objectMapper.writeValueAsString(snapshot);
+//                System.out.println(innovationJson);
+//
+//                InnovationHistory innovHistory = new InnovationHistory();
+//                innovHistory.setArchivedInnovationData(innovationJson);
+//                innovHistory.setDateCreated(LocalDate.now());
+//                innovHistory.setReview(savedLog);
+//                innovHistory.setInnovation(innovation);
+//                innovationHistoryRepository.save(innovHistory);
+//
+//            } catch (JsonProcessingException e) {
+//                logger.error("Failed to convert innovation to JSON for history log", e);
+//                // Optionally, throw or handle
+//            }
+//
+//        }
 
-            try {
-                // Convert the rejected innovation to JSON
-                Map<String, Object> snapshot = new HashMap<>();
-                snapshot.put("id", innovation.getId());
-                snapshot.put("title", innovation.getTitle());
-                snapshot.put("purpose", innovation.getPurpose());
-                snapshot.put("category", innovation.getCategory());
-                snapshot.put("description", innovation.getDescription());
-                snapshot.put("additionalInfo", innovation.getAdditionalInfo());
-                snapshot.put("reasonsProvingYouCanInvent", innovation.getReasonsProvingYouCanInvent());
-                snapshot.put("impact", innovation.getImpact());
-                snapshot.put("resourcesNeeded", innovation.getResourcesNeeded());
-                snapshot.put("attachment", innovation.getAttachment());
+//        notification part commented
+//        String contentUrlInnovator = "http://localhost:3000/dashboard/innovator/review/" + innovation.getId();
+//        String contentUrlBoardMember = "http://localhost:3000/dashboard/boardmember/review/" + innovation.getId();
+//        if (savedLog.getStateChangedTo() == InnovStatus.APPROVED || savedLog.getStateChangedTo() == InnovStatus.REJECTED) {
+//            notificationService.sendNotification(
+//                    innovation.getCreatedBy().getId(),
+//                    "Your Innovation Tittled \"" + innovation.getTitle() + "\" has been " + savedLog.getStateChangedTo().name().toLowerCase() + "",
+//                    contentUrlInnovator
+//            );
+//        }
+//        if (savedLog.getStateChangedTo() == InnovStatus.RESUBMITTED && innovation.getCommittee()!=null) {
+//            notificationService.sendNotification(
+//                    innovation.getCommittee().getId(),
+//                    "Innovation Tittled \"" + innovation.getTitle() + "\" has been " + savedLog.getStateChangedTo().name().toLowerCase() + "to You",
+//                    contentUrlBoardMember
+//            );
+//        }
 
-                String innovationJson = objectMapper.writeValueAsString(snapshot);
-                System.out.println(innovationJson);
-
-                InnovationHistory innovHistory = new InnovationHistory();
-                innovHistory.setArchivedInnovationData(innovationJson);
-                innovHistory.setDateCreated(LocalDate.now());
-                innovHistory.setReview(savedLog);
-                innovHistory.setInnovation(innovation);
-                innovationHistoryRepository.save(innovHistory);
-
-                } catch (JsonProcessingException e) {
-                logger.error("Failed to convert innovation to JSON for history log", e);
-                // Optionally, throw or handle
-                }
-
-        }
-
-        String contentUrlInnovator = "http://localhost:3000/dashboard/innovator/review/" + innovation.getId();
-        String contentUrlBoardMember = "http://localhost:3000/dashboard/boardmember/review/" + innovation.getId();
-        if (savedLog.getStateChangedTo() == InnovStatus.APPROVED || savedLog.getStateChangedTo() == InnovStatus.REJECTED) {
-            notificationService.sendNotification(
-            innovation.getCreatedBy().getId(),
-            "Your Innovation Tittled \"" + innovation.getTitle() + "\" has been " + savedLog.getStateChangedTo().name().toLowerCase() + "",
-            contentUrlInnovator
-            );
-        }
-
-        if (savedLog.getStateChangedTo() == InnovStatus.RESUBMITTED && innovation.getBoardMember()!=null) {
-            notificationService.sendNotification(
-            innovation.getCreatedBy().getId(),
-            "Innovation Tittled \"" + innovation.getTitle() + "\" has been " + savedLog.getStateChangedTo().name().toLowerCase() + "to You",
-            contentUrlBoardMember
-            );
-        }
-        
-
-        // Return the InnovationDTO with the required fields
         return new InnovationStatusChangeResponseDTO(
-            innovation.getId(),
-            innovation.getTitle(),
-            innovation.getStatus(),
-            stateChangedByUser,  // state changed by the user
-            log.getCreatedDate(),  // created on date
-            log.getComment()
+                innovation.getId(),
+                innovation.getTitle(),
+                innovation.getStatus(),
+                stateChangedByUser,
+                log.getCreatedDate(),
+                log.getComment()
         );
     }
 
-
-    //innovation assignment service
+    //Innovation Assignment Service
     @Transactional
-    public InnovationAssignmentResponseDTO assignInnovation(Long innovationId,Long assignerId, Long boardMemberId, String status,String comment) {
-        // Retrieve the innovation
+    public InnovationAssignmentResponseDTO assignInnovation(Long innovationId, Long assignerId, Long committeeId, String status, String comment) {
         Innovation innovation = innovationRepository.findById(innovationId)
                 .orElseThrow(() -> new RuntimeException("Innovation not found"));
 
-         // Get the currently authenticated admin (assigner)
-         MyUser assigner = myUserRepository.findById(assignerId)
-         .orElseThrow(() -> new RuntimeException("Assigner not found"));
+        MyUser assigner = myUserRepository.findById(assignerId)
+                .orElseThrow(() -> new RuntimeException("Assigner not found"));
 
-        // Retrieve the board member
-        MyUser boardMember = myUserRepository.findById(boardMemberId)
-                .orElseThrow(() -> new RuntimeException("Board member not found"));
+//        Committee committee = myUserRepository.findById(committeeId)
+//                .orElseThrow(() -> new RuntimeException("Committee not found"));
 
+        Committee committee = committeeRepository.findById(committeeId)
+                .orElseThrow(() -> new RuntimeException("Committee not found"));
 
-        // Update innovation details
         innovation.setAssigner(assigner);
         innovation.setStatus(InnovStatus.ASSIGNED);
-        innovation.setBoardMember(boardMember);
+        innovation.setCommittee(committee);
         innovation.setIsAssigned(true);
         innovation.setAssignedDate(new Date());
-        // innovation.setLastModifiedDate(new Date());
         innovationRepository.save(innovation);
 
         Review log = new Review();
@@ -251,79 +223,47 @@ public class InnovationService {
         log.setCreatedBy(assigner);
         log.setCreatedDate(LocalDate.now());
         log.setComment(comment);
-        log.setAssignedTo(boardMember);
+        log.setAssignedTo(committee);
         log.setInnovation(innovation);
         Review savedLog = reviewRepository.save(log);
 
-        String contentUrlInnovator = "http://localhost:3000/dashboard/innovator/review/" + innovation.getId();
-        String contentUrlBoardMember = "http://localhost:3000/dashboard/boardmember/review/" + innovation.getId();
-        if (savedLog.getStateChangedTo() == InnovStatus.ASSIGNED) {
+//        notification part commented
+//        String contentUrlInnovator = "http://localhost:3000/dashboard/innovator/review/" + innovation.getId();
+//        String contentUrlBoardMember = "http://localhost:3000/dashboard/boardmember/review/" + innovation.getId();
+//        if (savedLog.getStateChangedTo() == InnovStatus.ASSIGNED) {
+//
+//            notificationService.sendNotification(
+//                    innovation.getCreatedBy().getId(),
+//                    "Your Innovation Tittled \"" + innovation.getTitle() + "\" has been " + savedLog.getStateChangedTo().name().toLowerCase() + "",
+//                    contentUrlInnovator
+//            );
+//            if(innovation.getCommittee() !=null){
+//                notificationService.sendNotification(
+//                        innovation.getCommittee().getId(),
+//                        "Innovation Tittled \"" + innovation.getTitle() + "\" has been " + savedLog.getStateChangedTo().name().toLowerCase() + "to You",
+//                        contentUrlBoardMember
+//                );
+//            }
+//        }
 
-            notificationService.sendNotification(
-            innovation.getCreatedBy().getId(),
-            "Your Innovation Tittled \"" + innovation.getTitle() + "\" has been " + savedLog.getStateChangedTo().name().toLowerCase() + "",
-            contentUrlInnovator
-            );
-            if(innovation.getBoardMember() !=null){
-                notificationService.sendNotification(
-                innovation.getBoardMember().getId(),
-                "Innovation Tittled \"" + innovation.getTitle() + "\" has been " + savedLog.getStateChangedTo().name().toLowerCase() + "to You",
-                contentUrlBoardMember
-                );
-            }
-        }
-
-        if (log.getStateChangedTo() == InnovStatus.REJECTED) {
-            logger.debug("Innovation status changed to REJECTED.");
-        }
-
-        // // Notify Innovator & Board Member
-        // notificationService.sendNotification(
-        //         innovation.getCreatedBy().getId(),
-        //         "Your innovation has been assigned to a board member." + innovationId
-        // );
-
-        // notificationService.sendNotification(
-        //         boardMember.getId(),
-        //         "You have been assigned an innovation: " + innovation.getTitle() + innovationId
-        // );
-
-        // Return assignment response DTO
         return new InnovationAssignmentResponseDTO(
-            innovation.getId(),
-            innovation.getTitle(),
-            innovation.getStatus(),
-            innovation.getBoardMember(),
-            innovation.getAssigner(),
-            log.getCreatedDate(),
-            log.getComment()
+                innovation.getId(),
+                innovation.getTitle(),
+                innovation.getStatus(),
+                innovation.getCommittee(),
+                innovation.getAssigner(),
+                log.getCreatedDate(),
+                log.getComment()
         );
     }
 
-    // public List<Innovation> getAllInnovations() {
-    //     return innovationRepository.findAll();
-    // }
-
-    // public List<Innovation> searchInnovations(
-    //         Category category, InnovStatus status, Date createDate, Date lastModifiedDate,
-    //         Date assignedDate, MyUser assigner, MyUser boardMember, MyUser createdBy) {
-
-    //     Specification<Innovation> spec = InnovationSpecification.filterByCriteria(
-    //             category, status, createDate, lastModifiedDate, assignedDate, assigner, boardMember, createdBy);
-
-    //     return innovationRepository.findAll(spec);
-    // }
-
-    public Page<Innovation> searchInnovations(
-            InnovationSearchCriteriaDTO criteria,int page, int size, String[] sort)
-    {
+    public Page<Innovation> searchInnovations(InnovationSearchCriteriaDTO criteria, int page, int size, String[] sort) {
         Specification<Innovation> spec = InnovationSpecification.filterByCriteria(criteria);
         Pageable pageable = PageRequest.of(page, size, Sort.by(getSortOrders(sort)));
-        
+
         return innovationRepository.findAll(spec, pageable);
     }
 
-    //Sorting Helper Method
     private List<Sort.Order> getSortOrders(String[] sort) {
         List<Sort.Order> orders = new ArrayList<>();
         for (String sortOrder : sort) {
@@ -335,8 +275,6 @@ public class InnovationService {
         return orders.isEmpty() ? List.of(new Sort.Order(Sort.Direction.ASC, "id")) : orders;
     }
 
-
-
     public Optional<Innovation> getInnovationById(Long id) {
         return innovationRepository.findById(id);
     }
@@ -344,12 +282,10 @@ public class InnovationService {
     public void deleteInnovationById(Long id) {
         Optional<Innovation> innovation = innovationRepository.findById(id);
         if (innovation.isPresent()) {
-            // Check if boardMemberId is assigned
-            if (innovation.get().getBoardMember() != null) {
+            if (innovation.get().getCommittee() != null) {
                 throw new IllegalStateException("This innovation is assigned to a board member and cannot be deleted.");
             }
-        
-            // If no board member is assigned, proceed with deletion
+
             innovationRepository.deleteById(id);
         } else {
             throw new EntityNotFoundException("Innovation with ID " + id + " not found.");

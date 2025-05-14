@@ -25,51 +25,51 @@ public class ReviewService {
 
     // public List<ReviewAssigneesLogsResponseDTO> getAssignedReviews(Long innovationId) {
     //     return reviewRepository.findByInnovationIdAndAssignedToIsNotNull(innovationId);
-    // }  
-    
+    // }
+
     public List<ReviewLogsResponseDTO> getReviews(Long innovationId) {
         List<Review> reviews = reviewRepository.findReviewLogs(innovationId);
 
         return reviews.stream()
-            .map(r -> {
-                InnovationHistoryResponseDTO parsedData = null;
-                try {
-                    if (r.getInnovationHistory() != null && r.getInnovationHistory().getArchivedInnovationData() != null) {
-                        parsedData = objectMapper.readValue(
-                            r.getInnovationHistory().getArchivedInnovationData(),
-                            InnovationHistoryResponseDTO.class
-                        );
+                .map(r -> {
+                    InnovationHistoryResponseDTO parsedData = null;
+                    try {
+                        if (r.getInnovationHistory() != null && r.getInnovationHistory().getArchivedInnovationData() != null) {
+                            parsedData = objectMapper.readValue(
+                                    r.getInnovationHistory().getArchivedInnovationData(),
+                                    InnovationHistoryResponseDTO.class
+                            );
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
 
-                return new ReviewLogsResponseDTO(
-    r.getId(),
-    r.getStateChangedTo(),
-    r.getCreatedBy(),
-    r.getCreatedDate(),
-    r.getComment(),
-    r.getInnovationHistory() != null && parsedData != null
-        ? new InnovationHistoryResponseDTO(
-            r.getInnovationHistory().getId(),
-            parsedData.getTitle(),
-            parsedData.getPurpose(),
-            parsedData.getCategory(),
-            parsedData.getDescription(),
-            parsedData.getAdditionalInfo(),
-            parsedData.getReasonsProvingYouCanInvent(),
-            parsedData.getImpact(),
-            parsedData.getResourcesNeeded(),
-            parsedData.getAttachment(),
-            r.getInnovationHistory().getDateCreated(),
-            null // don't include archivedInnovationData in the response
-        )
-        : null
-);
+                    return new ReviewLogsResponseDTO(
+                            r.getId(),
+                            r.getStateChangedTo(),
+                            r.getCreatedBy(),
+                            r.getCreatedDate(),
+                            r.getComment()
+                            // r.getInnovationHistory() != null && parsedData != null
+                            //     ? new InnovationHistoryResponseDTO(
+                            //         r.getInnovationHistory().getId(),
+                            //         parsedData.getTitle(),
+                            //         parsedData.getPurpose(),
+                            //         parsedData.getCategory(),
+                            //         parsedData.getDescription(),
+                            //         parsedData.getAdditionalInfo(),
+                            //         parsedData.getReasonsProvingYouCanInvent(),
+                            //         parsedData.getImpact(),
+                            //         parsedData.getResourcesNeeded(),
+                            //         parsedData.getAttachment(),
+                            //         r.getInnovationHistory().getDateCreated(),
+                            //         null // don't include archivedInnovationData in the response
+                            //     )
+                            //     : null
+                    );
 
-            })
-            .collect(Collectors.toList());
+                })
+                .collect(Collectors.toList());
     }
 
     public List<ReviewAssigneesLogsResponseDTO> getAssignedReviews(Long innovationId) {

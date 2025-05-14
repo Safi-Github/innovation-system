@@ -3,6 +3,7 @@ package mcit.ddr.innovation.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import mcit.ddr.innovation.entity.Committee;
 import mcit.ddr.innovation.entity.MyUser;
 import mcit.ddr.innovation.enums.InnovStatus;
 
@@ -20,5 +21,5 @@ public class ReviewAssigneesLogsResponseDTO{
     private MyUser createdBy;
     private LocalDate createdDate;
     private String comment;
-    private MyUser assignedTo;
+    private Committee assignedTo;
 }
