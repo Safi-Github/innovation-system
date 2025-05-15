@@ -2,6 +2,7 @@ package mcit.ddr.innovation.controller;
 
 import mcit.ddr.innovation.dto.CommitteeDTO;
 import mcit.ddr.innovation.entity.Committee;
+import mcit.ddr.innovation.entity.Innovation;
 import mcit.ddr.innovation.service.CommitteeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +54,13 @@ public class CommitteeController {
     public ResponseEntity<Committee> getCommitteeById(@PathVariable Long id) {
         return ResponseEntity.ok(committeeService.getCommitteeById(id));
     }
+
+    @GetMapping("/{id}/innovations")
+    public ResponseEntity<List<Innovation>> getCommitteeInnovations(@PathVariable Long id) {
+        List<Innovation> innovations = committeeService.getInnovationsByCommittee(id);
+        return ResponseEntity.ok(innovations);
+    }
+
 
 
 

@@ -2,6 +2,7 @@ package mcit.ddr.innovation.service;
 
 import mcit.ddr.innovation.dto.CommitteeDTO;
 import mcit.ddr.innovation.entity.Committee;
+import mcit.ddr.innovation.entity.Innovation;
 import mcit.ddr.innovation.entity.MyUser;
 import mcit.ddr.innovation.repository.CommitteeRepository;
 import mcit.ddr.innovation.repository.MyUserRepository;
@@ -80,5 +81,11 @@ public class CommitteeService {
     public Committee getCommitteeById(Long id) {
         return committeeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Committee not found with id: " + id));
+    }
+
+    public List<Innovation> getInnovationsByCommittee(Long committeeId) {
+        Committee committee = committeeRepository.findById(committeeId)
+                .orElseThrow(() -> new RuntimeException("Committee not found"));
+        return committee.getInnovations();
     }
 }

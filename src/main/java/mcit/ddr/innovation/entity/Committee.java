@@ -35,6 +35,13 @@ public class Committee {
     @JsonManagedReference
     private List<CommitteeMember> members = new ArrayList<>();
 
+
+    @OneToMany(mappedBy = "committee", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<Innovation> innovations;
+
+
+
     public void setIsClosed(boolean isClosed) {
         this.isClosed=isClosed;
     }
