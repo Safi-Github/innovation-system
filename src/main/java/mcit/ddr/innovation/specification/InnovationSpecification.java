@@ -64,10 +64,15 @@ public class InnovationSpecification {
             }
 
             // 🟢 Filter by Board Member
-            if (criteria.getBoardMember() != null) {
-                predicates.add(cb.equal(root.get("boardMember"), criteria.getBoardMember()));
-            }
+            // if (criteria.getBoardMember() != null) {
+            //     predicates.add(cb.equal(root.get("boardMember"), criteria.getBoardMember()));
+            // }
 
+            
+            // 🟢 Filter by Committee
+            if (criteria.getCommittee() != null) {
+                predicates.add(cb.equal(root.get("committee"), criteria.getCommittee()));
+            }
             // 🟢 Filter by Created By
             if (criteria.getCreatedBy() != null) {
                 predicates.add(cb.equal(root.get("createdBy"), criteria.getCreatedBy()));

@@ -21,14 +21,18 @@ public class Committee {
     @Column(unique = true)
     private String name;
 
+    @Column(columnDefinition = "TEXT")
+    private String describtion;
+
     @ManyToOne
     @JoinColumn(name = "created_by")
     private MyUser createdBy;
 
-
     private LocalDate createdDate;
 
     private boolean isClosed;
+
+    private String attachment;
 
 
     @OneToMany(mappedBy = "committee", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -37,5 +41,8 @@ public class Committee {
 
     public void setIsClosed(boolean isClosed) {
         this.isClosed=isClosed;
+    }
+    public void setDescribtion(String describtion) {
+        this.describtion = describtion;
     }
 }

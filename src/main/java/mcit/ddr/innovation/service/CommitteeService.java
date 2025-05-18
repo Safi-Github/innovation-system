@@ -1,5 +1,6 @@
 package mcit.ddr.innovation.service;
 
+import mcit.ddr.innovation.service.CommitteeFileStorageService;
 import mcit.ddr.innovation.dto.CommitteeDTO;
 import mcit.ddr.innovation.entity.Committee;
 import mcit.ddr.innovation.entity.MyUser;
@@ -10,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -19,45 +21,96 @@ public class CommitteeService {
 
     private final CommitteeRepository committeeRepository;
     private final MyUserRepository userRepository;
+    private final CommitteeFileStorageService committeeFileStorageService;
 
     public CommitteeService(CommitteeRepository committeeRepository, MyUserRepository userRepository) {
         this.committeeRepository = committeeRepository;
         this.userRepository = userRepository;
+        this.committeeFileStorageService = new CommitteeFileStorageService();
     }
 
-    public Committee createCommittee(CommitteeDTO dto) {
-        Committee committee = new Committee();
-        committee.setName(dto.getName());
-        committee.setCreatedDate(LocalDate.now()); // Assuming you have a field createdDate
-        committee.setIsClosed(false); // Default value
+    // public Committee createCommittee(CommitteeDTO dto) {
+    //     Committee committee = new Committee();
+    //     committee.setName(dto.getName());
+    //     committee.setDescribtion(dto.getDescribtion());
+    //     committee.setCreatedDate(LocalDate.now()); 
+    //     committee.setIsClosed(false); 
 
-//        MyUser creator = userRepository.findById(dto.getCreatedById())
-//                .orElseThrow(() -> new RuntimeException("User not found with id: " + dto.getCreatedById()));
+    //     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    //     String username = auth.getName();
 
+    //     MyUser creator = userRepository.findByUsername(username)
+    //             .orElseThrow(() -> new RuntimeException("User not found: " + username));
+    //     committee.setCreatedBy(creator);
+
+    //     return committeeRepository.save(committee);
+    // }
+
+        public Committee createCommittee(Committee dto, MultipartFile attachmentFile) {
+        // Add default values and set user information
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
-
-        MyUser creator = userRepository.findByUsername(username)
+        MyUser currentUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found: " + username));
-        committee.setCreatedBy(creator);
 
+        Committee committee = new Committee();
+        committee.setName(dto.getName());
+        committee.setDescribtion(dto.getDescribtion());
+        committee.setCreatedDate(LocalDate.now());  
+        committee.setCreatedBy(currentUser);
+        committee.setIsClosed(false);
+
+        // Handle file upload if a file is provided
+        if (attachmentFile != null && !attachmentFile.isEmpty()) {
+            String filePath = committeeFileStorageService.saveFile(attachmentFile);
+            committee.setAttachment(filePath);  // Save the file path to the committee entity
+        }
+
+        // Save the committee to the database
         return committeeRepository.save(committee);
     }
 
-    public Committee updateCommitteeName(Long id, String newName) {
+    // public Committee updateCommitteeName(Long id, String newName) {
+    //     Committee committee = committeeRepository.findById(id)
+    //             .orElseThrow(() -> new RuntimeException("Committee not found"));
+
+    //     // Check if the new name is already used by another committee
+    //     committeeRepository.findByName(newName).ifPresent(existing -> {
+    //         if (!existing.getId().equals(id)) {
+    //             throw new RuntimeException("A committee with this name already exists.");
+    //         }
+    //     });
+
+    //     committee.setName(newName);
+    //     return committeeRepository.save(committee);
+    // }
+
+    public Committee partialUpdateCommittee(Long id, CommitteeDTO dto, MultipartFile file) {
         Committee committee = committeeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Committee not found"));
-
-        // Check if the new name is already used by another committee
-        committeeRepository.findByName(newName).ifPresent(existing -> {
-            if (!existing.getId().equals(id)) {
-                throw new RuntimeException("A committee with this name already exists.");
-            }
-        });
-
-        committee.setName(newName);
+    
+        if (dto.getName() != null) {
+            // Check if new name exists on another committee
+            committeeRepository.findByName(dto.getName()).ifPresent(existing -> {
+                if (!existing.getId().equals(id)) {
+                    throw new RuntimeException("A committee with this name already exists.");
+                }
+            });
+            committee.setName(dto.getName());
+        }
+    
+        if (dto.getDescribtion() != null) {
+            committee.setDescribtion(dto.getDescribtion());
+        }
+    
+        if (file != null && !file.isEmpty()) {
+            String filePath = committeeFileStorageService.saveFile(file);
+            committee.setAttachment(filePath);  // Adjust field name accordingly
+        }
+    
         return committeeRepository.save(committee);
     }
+    
 
     @Transactional
     public void deleteCommittee(Long id) {

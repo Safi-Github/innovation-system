@@ -20,7 +20,7 @@ public interface CommitteeMemberRepository extends JpaRepository<CommitteeMember
 
     List<CommitteeMember> findByUserId(Long userId);
 
-    @Query("SELECT new mcit.ddr.innovation.dto.UserInCommitteesDTO(c.name, c.isClosed, c.createdDate) " +
+    @Query("SELECT new mcit.ddr.innovation.dto.UserInCommitteesDTO(c.id,c.name, c.isClosed, c.createdDate) " +
             "FROM CommitteeMember cm JOIN cm.committee c " +
             "WHERE cm.user.id = :userId")
 
