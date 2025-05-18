@@ -2,8 +2,6 @@ package mcit.ddr.innovation.controller;
 
 import lombok.RequiredArgsConstructor;
 import mcit.ddr.innovation.dto.CommitteeMemberDTO;
-import mcit.ddr.innovation.dto.UserInCommitteesDTO;
-import mcit.ddr.innovation.entity.Committee;
 import mcit.ddr.innovation.entity.CommitteeMember;
 import mcit.ddr.innovation.service.CommitteeMemberService;
 import org.springframework.http.ResponseEntity;
@@ -24,12 +22,12 @@ public class CommitteeMemberController {
         return ResponseEntity.ok(member);
     }
 
-    // List of all committees a member is a part of it
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<UserInCommitteesDTO>> getCommitteeSummariesByUser(@PathVariable Long userId) {
-        List<UserInCommitteesDTO> summaries = committeeMemberService.getCommitteeSummariesByUserId(userId);
-        return ResponseEntity.ok(summaries);
-    }
+//    // List of all committees a member is a part of it
+//    @GetMapping("/user/{userId}")
+//    public ResponseEntity<List<UserInCommitteesDTO>> getCommitteeSummariesByUser(@PathVariable Long userId) {
+//        List<UserInCommitteesDTO> summaries = committeeMemberService.getCommitteeSummariesByUserId(userId);
+//        return ResponseEntity.ok(summaries);
+//    }
 
     // Get All Members of a Committee
     @GetMapping("/committee/{committeeId}")

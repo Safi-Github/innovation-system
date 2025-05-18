@@ -52,16 +52,33 @@ public class CommitteeMemberService {
         return committeeMemberRepository.save(member);
     }
 
-//    public List<Committee> getAllCommitteesByUserId(Long userId) {
-//        return committeeMemberRepository.findByUserId(userId)
-//                .stream()
-//                .map(cm -> cm.getCommittee())
+    public List<Committee> getAllCommitteesByUserId(Long userId) {
+        return committeeMemberRepository.findByUserId(userId)
+                .stream()
+                .map(cm -> cm.getCommittee())
+                .collect(Collectors.toList());
+    }
+
+//    public List<UserInCommitteesDTO> getCommitteeSummariesByUserId(Long userId) {
+//        return committeeMemberRepository.findCommitteeSummariesByUserId(userId);
+//    }
+
+//    public List<UserInCommitteesDTO> getCommitteeSummariesByUserId(Long userId) {
+//        List<CommitteeMember> members = committeeMemberRepository.findByUserId(userId);
+//
+//        return members.stream()
+//                .map(cm -> {
+//                    Committee committee = cm.getCommittee();
+//                    return new UserInCommitteesDTO(
+//                            committee.getId(),              // ✅ Ensures committeeId is set
+//                            committee.getName(),
+//                            committee.getIsClosed(),
+//                            committee.getCreatedDate()
+//                    );
+//                })
 //                .collect(Collectors.toList());
 //    }
 
-    public List<UserInCommitteesDTO> getCommitteeSummariesByUserId(Long userId) {
-        return committeeMemberRepository.findCommitteeSummariesByUserId(userId);
-    }
 
     public List<CommitteeMember> getMembersByCommitteeId(Long committeeId) {
         Committee committee = committeeRepository.findById(committeeId)

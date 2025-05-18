@@ -40,8 +40,6 @@ public class Committee {
     @JsonManagedReference
     private List<Innovation> innovations;
 
-
-
     public void setIsClosed(boolean isClosed) {
         this.isClosed=isClosed;
     }
