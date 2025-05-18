@@ -78,7 +78,7 @@ public class Innovation {
 //    @JoinColumn(name = "board_member_id")
 //    private MyUser boardMember;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "committee_id")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "members"})
     @JsonBackReference

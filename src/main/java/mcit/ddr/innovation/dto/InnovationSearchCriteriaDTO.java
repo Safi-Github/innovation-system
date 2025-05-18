@@ -1,6 +1,7 @@
 package mcit.ddr.innovation.dto;
 
 import lombok.Data;
+import mcit.ddr.innovation.entity.Committee;
 import mcit.ddr.innovation.entity.MyUser;
 // import mcit.ddr.innovation.enums.Category;
 import mcit.ddr.innovation.enums.InnovStatus;
@@ -26,6 +27,7 @@ public class InnovationSearchCriteriaDTO {
     private Date assignedDate;
 
     private MyUser assigner;
-    private MyUser boardMember;
+    // private MyUser boardMember;
+    private Committee committee;
     private MyUser createdBy;
 }

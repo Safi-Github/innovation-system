@@ -19,13 +19,6 @@ public class NotificationController {
         this.notificationService = notificationService;
     }
 
-    // Endpoint to get all notifications for a user read/unread
-    @GetMapping
-    public ResponseEntity<List<Notification>> getNotificationsByUserId(@RequestParam Long userId) {
-        List<Notification> notifications = notificationService.getNotifications(userId);
-        return ResponseEntity.ok(notifications);
-    }
-
     // Endpoint to get unread notifications for a user
     @GetMapping("/unread")
     public ResponseEntity<List<Notification>> getUnreadNotifications(@RequestParam Long userId) {
@@ -34,7 +27,7 @@ public class NotificationController {
     }
 
     // Endpoint to mark a notification as read
-    @PostMapping("/{notificationId}/read")
+    @PutMapping("/{notificationId}/read")
     public ResponseEntity<String> markAsRead(@PathVariable Long notificationId) {
         notificationService.markNotificationAsRead(notificationId);
         return ResponseEntity.ok("Notification marked as read");

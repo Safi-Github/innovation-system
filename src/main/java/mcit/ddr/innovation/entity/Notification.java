@@ -3,7 +3,7 @@ package mcit.ddr.innovation.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Data
@@ -17,15 +17,17 @@ public class Notification {
 
     private String contentUrl;
 
-    private LocalDateTime createdAt;
+    private LocalDate createdAt;
 
-    private boolean read = false; // New field to track if notification is read
+    private LocalDate readAt ; // New field to track if notification is read
 
     @ManyToOne(fetch = FetchType.EAGER) // Change to EAGER
     @JoinColumn(name = "notifying_user_id")
     private MyUser notifyingUser;
 
+
     public Notification() {
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = LocalDate
+        .now();
     }
 }

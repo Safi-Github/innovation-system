@@ -10,6 +10,8 @@ import java.util.Date;
 @AllArgsConstructor
 public class UserInCommitteesDTO {
 
+    private Long id;
+
     private String name;
 
     private Boolean isClosed;

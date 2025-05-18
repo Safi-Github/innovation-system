@@ -8,7 +8,7 @@ import mcit.ddr.innovation.repository.MyUserRepository;
 import mcit.ddr.innovation.repository.NotificationRepository;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -31,25 +31,29 @@ public class NotificationService {
         notification.setNotifyingUser(user);
         notification.setMessage(message);
         notification.setContentUrl(contentUrl); // Include the frontend link
-        notification.setCreatedAt(LocalDateTime.now());
-        notification.setRead(false); // New notifications should be unread
+        notification.setCreatedAt(LocalDate.now());
 
         notificationRepository.save(notification);
     }
 
     // Fetch all notifications for a user (both read and unread)
-    public List<Notification> getNotifications(Long userId) {
-        return notificationRepository.findByNotifyingUserIdOrderByCreatedAtDesc(userId);
-    }
+    // public List<Notification> getNotifications(Long userId) {
+    //     return notificationRepository.findByNotifyingUserIdOrderByCreatedAtDesc(userId);
+    // }
 
-    // Fetch only unread notifications for a user
+    // // Fetch only unread notifications for a user
+    // public List<Notification> getUnreadNotifications(Long userId) {
+    //     return notificationRepository.findByNotifyingUserIdOrderByCreatedAtDesc(userId);
+    // }
+
+    // // Fetch only read notifications for a user
+    // public List<Notification> getReadNotifications(Long userId) {
+    //     return notificationRepository.findByNotifyingUserIdOrderByCreatedAtDesc(userId);
+    // }
+
+    // // Fetch only unread notifications for the logged in user
     public List<Notification> getUnreadNotifications(Long userId) {
-        return notificationRepository.findByNotifyingUserIdAndReadFalseOrderByCreatedAtDesc(userId);
-    }
-
-    // Fetch only read notifications for a user
-    public List<Notification> getReadNotifications(Long userId) {
-        return notificationRepository.findByNotifyingUserIdAndReadTrueOrderByCreatedAtDesc(userId);
+        return notificationRepository.findUnreadByNotifyingUser(userId);
     }
 
     // Mark notification as read
@@ -58,7 +62,7 @@ public class NotificationService {
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Notification not found"));
 
-        notification.setRead(true);
+        notification.setReadAt(LocalDate.now());
         notificationRepository.save(notification);
     }
 }
