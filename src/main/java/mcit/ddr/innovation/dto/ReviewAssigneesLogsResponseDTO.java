@@ -20,6 +20,6 @@ public class ReviewAssigneesLogsResponseDTO{
     private InnovStatus stateChangedTo;
     private MyUser createdBy;
     private LocalDate createdDate;
-    private String comment;
+    private String consideration;
     private Committee assignedTo;
 }

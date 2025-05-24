@@ -22,7 +22,7 @@ public class ReviewLogsResponseDTO{
     private InnovStatus stateChangedTo;
     private MyUser createdBy;
     private LocalDate createdDate;
-    private String comment;
+    private String consideration;
 //    @JsonProperty("previous_submission")
 //    private InnovationHistoryResponseDTO innovationHistoryResponseDTO;
 }

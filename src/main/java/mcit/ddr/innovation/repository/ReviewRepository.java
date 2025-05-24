@@ -13,7 +13,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     // the innovation assigned to board members logs
     @Query("SELECT new mcit.ddr.innovation.dto.ReviewAssigneesLogsResponseDTO(" +
-            "r.id, r.stateChangedTo, r.createdBy, r.createdDate, r.comment, r.assignedTo) " +
+            "r.id, r.stateChangedTo, r.createdBy, r.createdDate, r.consideration, r.assignedTo) " +
             "FROM Review r WHERE r.innovation.id = :innovationId AND r.assignedTo IS NOT NULL")
     List<ReviewAssigneesLogsResponseDTO> findReviewAssignedLogs(@Param("innovationId") Long innovationId);
 

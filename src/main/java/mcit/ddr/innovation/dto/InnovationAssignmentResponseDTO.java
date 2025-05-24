@@ -19,5 +19,5 @@ public class InnovationAssignmentResponseDTO {
     private Committee committee;   // Assigned to Committee
     private MyUser createdBy;    // Assigner
     private LocalDate createdDate; // Date of the assignment
-    private String comment;
+    private String consideration;
 }

@@ -49,7 +49,7 @@ public class ReviewService {
                             r.getStateChangedTo(),
                             r.getCreatedBy(),
                             r.getCreatedDate(),
-                            r.getComment()
+                            r.getConsideration()
                             // r.getInnovationHistory() != null && parsedData != null
                             //     ? new InnovationHistoryResponseDTO(
                             //         r.getInnovationHistory().getId(),

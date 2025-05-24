@@ -125,8 +125,8 @@ public class InnovationService {
         }
 
         //Check if status is equal to Approved
-        if(InnovStatus.valueOf(statusValue.toUpperCase())==InnovStatus.APPROVED || 
-            InnovStatus.valueOf(statusValue.toUpperCase())==InnovStatus.REJECTED)
+        if(innovation.getCommittee() !=null && (InnovStatus.valueOf(statusValue.toUpperCase())==InnovStatus.APPROVED || 
+        InnovStatus.valueOf(statusValue.toUpperCase())==InnovStatus.REJECTED))
             
             {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -180,7 +180,7 @@ public class InnovationService {
 
         Review log = new Review();
         log.setStateChangedTo(newStatus);
-        log.setComment(payload.get("comment"));
+        log.setConsideration(payload.get("consideration"));
         log.setCreatedBy(stateChangedByUser);
         log.setCreatedDate(LocalDate.now());
         log.setInnovation(innovation);
@@ -244,13 +244,13 @@ public class InnovationService {
                 innovation.getStatus(),
                 stateChangedByUser,
                 log.getCreatedDate(),
-                log.getComment()
+                log.getConsideration()
         );
     }
 
     //Innovation Assignment Service
     @Transactional
-    public InnovationAssignmentResponseDTO assignInnovation(Long innovationId, Long assignerId, Long committeeId, String status, String comment) {
+    public InnovationAssignmentResponseDTO assignInnovation(Long innovationId, Long assignerId, Long committeeId, String status, String consideration) {
         Innovation innovation = innovationRepository.findById(innovationId)
                 .orElseThrow(() -> new RuntimeException("Innovation not found"));
 
@@ -274,7 +274,7 @@ public class InnovationService {
         log.setStateChangedTo(InnovStatus.valueOf(status.toUpperCase()));
         log.setCreatedBy(assigner);
         log.setCreatedDate(LocalDate.now());
-        log.setComment(comment);
+        log.setConsideration(consideration);
         log.setAssignedTo(committee);
         log.setInnovation(innovation);
         Review savedLog = reviewRepository.save(log);
@@ -305,7 +305,7 @@ public class InnovationService {
                 innovation.getCommittee(),
                 innovation.getAssigner(),
                 log.getCreatedDate(),
-                log.getComment()
+                log.getConsideration()
         );
     }
 
