@@ -115,10 +115,14 @@ public class CommitteeMemberService {
         committeeMemberRepository.deleteByUserIdAndCommitteeId(userId, committeeId);
     }
 
-
+    //count committees a user is part of 
     public Long countCommitteesByUserId(Long userId) {
         return committeeMemberRepository.countCommitteesByUserId(userId);
     }
 
+    //count members per committee
+    public List<CommitteeMemberRepository.CommitteeUserCount> getUserCountPerCommittee() {
+        return committeeMemberRepository.countUsersPerCommittee();
+    }
 
 }

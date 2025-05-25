@@ -45,4 +45,17 @@ public interface CommitteeMemberRepository extends JpaRepository<CommitteeMember
     @Query("SELECT COUNT(cm) FROM CommitteeMember cm WHERE cm.user.id = :userId")
     Long countCommitteesByUserId(@Param("userId") Long userId);
 
+
+    //count users per committee
+    @Query("SELECT cm.committee.id AS committeeId, cm.committee.name AS committeeName, COUNT(cm.user.id) AS userCount " +
+        "FROM CommitteeMember cm " +
+        "GROUP BY cm.committee.id, cm.committee.name")
+    List<CommitteeUserCount> countUsersPerCommittee();
+
+    interface CommitteeUserCount {
+        Long getCommitteeId();
+        String getCommitteeName();
+        Long getUserCount();
+    }
+
 }
