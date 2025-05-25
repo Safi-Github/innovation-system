@@ -6,6 +6,7 @@ import mcit.ddr.innovation.entity.CommitteeMember;
 import mcit.ddr.innovation.entity.MyUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -39,5 +40,9 @@ public interface CommitteeMemberRepository extends JpaRepository<CommitteeMember
 
     // Find a specific member in a committee by userId
     Optional<CommitteeMember> findByCommitteeIdAndUserId(Long committeeId, Long userId);
+
+    //count the committees a user is part of:
+    @Query("SELECT COUNT(cm) FROM CommitteeMember cm WHERE cm.user.id = :userId")
+    Long countCommitteesByUserId(@Param("userId") Long userId);
 
 }

@@ -116,7 +116,9 @@ public class CommitteeMemberService {
     }
 
 
-
+    public Long countCommitteesByUserId(Long userId) {
+        return committeeMemberRepository.countCommitteesByUserId(userId);
+    }
 
 
 }

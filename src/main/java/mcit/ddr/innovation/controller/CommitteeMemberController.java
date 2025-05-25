@@ -30,6 +30,13 @@ public class CommitteeMemberController {
         List<UserInCommitteesDTO> summaries = committeeMemberService.getCommitteeSummariesByUserId(userId);
         return ResponseEntity.ok(summaries);
     }
+    //count the committees a user is part of
+    @GetMapping("/user/{userId}/count")
+    public ResponseEntity<Long> countCommitteesByUser(@PathVariable Long userId) {
+        Long count = committeeMemberService.countCommitteesByUserId(userId);
+        return ResponseEntity.ok(count);
+    }
+
 
     // Get All Members of a Committee
     @GetMapping("/committee/{committeeId}")
