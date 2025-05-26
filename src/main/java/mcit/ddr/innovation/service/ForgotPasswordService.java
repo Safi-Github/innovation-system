@@ -43,7 +43,8 @@ public class ForgotPasswordService {
     // Generate and send OTP
     public ResponseEntity<String> createOtpCode(ResetPasswordOTPRequest request) {
         String email = request.email();
-        MyUser user = myUserRepository.findByEmail(email);
+        MyUser user = myUserRepository.findByEmail(email).orElse(null);
+
 
         if (user == null) {
             return new ResponseEntity<>("User not found with email: " + email, HttpStatus.NOT_FOUND);
@@ -76,7 +77,7 @@ public class ForgotPasswordService {
             return ResponseEntity.badRequest().body("The New Password and Confirm New Password don't match");
         }
 
-        MyUser user = myUserRepository.findByEmail(username);
+        MyUser user = myUserRepository.findByEmail(username).orElse(null);
         if (user == null) {
             return ResponseEntity.badRequest().body("User not found");
         }

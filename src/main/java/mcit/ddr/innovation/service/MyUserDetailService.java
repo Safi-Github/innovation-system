@@ -29,20 +29,21 @@ public class MyUserDetailService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        MyUser user = repository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        MyUser user = repository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
         return User.builder()
-                .username(user.getUsername())
+                .username(user.getEmail())  // ✅ email used here
                 .password(user.getPassword())
                 .authorities(Collections.singletonList(new SimpleGrantedAuthority(user.getRole().name())))
                 .build();
     }
 
-    public void changePassword(String username, ChangePasswordRequest request) {
-        MyUser user = repository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+    public void changePassword(String email, ChangePasswordRequest request) {
+        MyUser user = repository.findByEmail(email)  // ✅ change to findByEmail
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
         if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
             throw new IllegalArgumentException("Current password is incorrect");

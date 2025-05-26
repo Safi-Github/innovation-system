@@ -205,58 +205,47 @@ public class AccountController {
         return jwtUtilityClass.extractUsername(jwt); // Use your actual JWT utility method
     }
 
-
-
-
     @PostMapping("/authenticate")
     public ResponseEntity<?> authenticateAndGetToken(@RequestBody LoginForm loginForm) {
         try {
-            //authentication start
+            // Authenticate using email and password
             Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                    loginForm.username(), loginForm.password()
-                )
+                    new UsernamePasswordAuthenticationToken(
+                            loginForm.email(), loginForm.password()
+                    )
             );
 
-            // check user isActive or not
-            MyUser user = myUserRepository.findByUsername(loginForm.username())
-            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+            MyUser user = myUserRepository.findByEmail(loginForm.email())
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
+            // Check if user is active
             if (!user.getIsActive()) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("inactive User. Please contact admin.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Inactive user. Please contact admin.");
             }
 
-//            if (!user.getIsEmailVerified()) {
-//                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Please verify your email before logging in.");
-//            }
-
-
-            //generate token
+            // Check if authenticated successfully
             if (authentication.isAuthenticated()) {
-                UserDetails userDetails = myUserDetailService.loadUserByUsername(loginForm.username());
+                UserDetails userDetails = myUserDetailService.loadUserByUsername(loginForm.email());
                 String token = jwtUtilityClass.generateToken(userDetails);
-
-                // List<String> roles = jwtUtilityClass.extractRoles(token);
-
-                // // Map<String, Object> response = new HashMap<>();
-                // // response.put("token", token);
-                // // response.put("roles", roles);
                 return ResponseEntity.ok(token);
             }
+
         } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Authentication error");
         }
+
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
-        }
-    
+    }
+
+
     @GetMapping("/account")
     public AdminUserDTO getAccount(@RequestHeader("Authorization") String token) {
         String jwt = token.replace("Bearer ", "");
-        String username = jwtUtilityClass.extractUsername(jwt);
+        String email = jwtUtilityClass.extractUsername(jwt);
 
-        Optional<MyUser> userOpt = myUserRepository.findByUsername(username);
+        Optional<MyUser> userOpt = Optional.ofNullable(myUserRepository.findByEmail(email)).orElse(null);
         if (userOpt.isEmpty()) {
             throw new RuntimeException("User not found");
         }

@@ -50,9 +50,9 @@ public class CommitteeService {
         public Committee createCommittee(Committee dto, MultipartFile attachmentFile) {
         // Add default values and set user information
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
-        MyUser currentUser = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+        String email = auth.getName();
+        MyUser currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found: " + email));
 
         Committee committee = new Committee();
         committee.setName(dto.getName());
@@ -113,13 +113,13 @@ public class CommitteeService {
     }
     
 
-    @Transactional
-    public void deleteCommittee(Long id) {
-        if (!committeeRepository.existsById(id)) {
-            throw new RuntimeException("Committee not found");
-        }
-        committeeRepository.deleteById(id);
-    }
+//    @Transactional
+//    public void deleteCommittee(Long id) {
+//        if (!committeeRepository.existsById(id)) {
+//            throw new RuntimeException("Committee not found");
+//        }
+//        committeeRepository.deleteById(id);
+//    }
 
     public Committee setCommitteeClosed(Long id, boolean isClosed) {
         Committee committee = committeeRepository.findById(id)

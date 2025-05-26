@@ -33,17 +33,43 @@ public class CategoryService {
         return categoryRepository.findById(id).orElseThrow(() -> new RuntimeException("Category not found"));
     }
 
+//    public Category updateCategory(Long id, Category updatedCategory) {
+//        return categoryRepository.findById(id).map(category -> {
+//            if (updatedCategory.getName() != null) {
+//                category.setName(updatedCategory.getName());
+//            }
+//            return categoryRepository.save(category);
+//        }).orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + id));
+//    }
+//
+//    // Delete a category
+//    public void deleteCategory(Long id) {
+//        categoryRepository.deleteById(id);
+//    }
+
     public Category updateCategory(Long id, Category updatedCategory) {
         return categoryRepository.findById(id).map(category -> {
+            if (!category.getInnovations().isEmpty()) {
+                throw new IllegalStateException("Cannot update category that is in use.");
+            }
+
             if (updatedCategory.getName() != null) {
                 category.setName(updatedCategory.getName());
             }
+
             return categoryRepository.save(category);
         }).orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + id));
     }
 
-    // Delete a category
     public void deleteCategory(Long id) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + id));
+
+        if (!category.getInnovations().isEmpty()) {
+            throw new IllegalStateException("Cannot delete category that is in use.");
+        }
+
         categoryRepository.deleteById(id);
     }
+
 }

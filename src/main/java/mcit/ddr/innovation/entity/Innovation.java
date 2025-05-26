@@ -33,9 +33,10 @@ public class Innovation {
 
     private String purpose;
 
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
 
-    // category is now an entity it should replace
-    private String category;
 
     @Column(columnDefinition = "TEXT")
     private String additionalInfo;
@@ -71,8 +72,6 @@ public class Innovation {
     @ManyToOne
     @JoinColumn(name = "assigner_id")
     private MyUser assigner;
-
-
 
 //    @ManyToOne
 //    @JoinColumn(name = "board_member_id")

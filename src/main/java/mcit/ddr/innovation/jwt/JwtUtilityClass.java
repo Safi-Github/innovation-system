@@ -42,9 +42,9 @@ public class JwtUtilityClass {
     }
 
     // Generate Reset Token
-    public String generateResetToken(String username) {
+    public String generateResetToken(String email) {
         return Jwts.builder()
-                .setSubject(username)
+                .setSubject(email)
                 .setIssuedAt(Date.from(Instant.now()))
                 .setExpiration(Date.from(Instant.now().plusMillis(RESET_TOKEN_VALIDITY)))
                 .signWith(generateKey(), SignatureAlgorithm.HS512)

@@ -1,10 +1,12 @@
 package mcit.ddr.innovation.enums;
 
 public enum LiteracyLevel {
+
     HIGH_SCHOOL ("High School"),
     BACHELOR("Bachelor"),
     MASTER("Master"),
-    DOCTORATE("Doctor");
+    DOCTORATE("Doctor"),
+    OTHER("Other");
 
     private final String displayName;
 
@@ -15,4 +17,6 @@ public enum LiteracyLevel {
     public String getDisplayName() {
         return displayName;
     }
+
+
 }

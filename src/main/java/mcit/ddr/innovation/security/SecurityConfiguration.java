@@ -66,6 +66,8 @@ public class SecurityConfiguration {
         return httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                // IMPORTANT: Explicitly register your AuthenticationProvider
+                .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(registry -> {
                     registry.requestMatchers("/home", "/api/register/**", "/api/authenticate").permitAll();
                     registry.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll();
@@ -83,7 +85,7 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        configuration.setAllowedOrigins(List.of("http://localhost:3000")); // make sure frontend runs here
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);

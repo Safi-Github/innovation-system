@@ -56,9 +56,9 @@ public class InnovationService {
 
     public Innovation createInnovation(Innovation innovation, MultipartFile attachmentFile) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
-        MyUser currentUser = myUserRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+        String email = auth.getName();
+        MyUser currentUser = myUserRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found: " + email));
 
         innovation.setCreateDate(new Date());
         innovation.setIsAssigned(false);
@@ -85,9 +85,9 @@ public class InnovationService {
         if (partialUpdateDTO.getPurpose() != null) {
             innovation.setPurpose(partialUpdateDTO.getPurpose());
         }
-        if (partialUpdateDTO.getCategory() != null) {
-            innovation.setCategory(partialUpdateDTO.getCategory());
-        }
+//        if (partialUpdateDTO.getCategory() != null) {
+//            innovation.setCategory(partialUpdateDTO.getCategory());
+//        }
         if (partialUpdateDTO.getAdditionalInfo() != null) {
             innovation.setAdditionalInfo(partialUpdateDTO.getAdditionalInfo());
         }

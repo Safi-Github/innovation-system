@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Entity
 @Data
 @Setter
@@ -20,4 +22,9 @@ public class Category {
 
     @Column(unique = true, nullable = false)
     private String name;
+
+    @OneToMany(mappedBy = "category")
+    @JsonIgnore
+    private List<Innovation> innovations;
+
 }

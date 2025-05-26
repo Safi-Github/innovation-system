@@ -99,8 +99,8 @@ public class InnovationController {
                 long maxSize = 3 * 1024 * 1024; // 3 MB in bytes
 
                 // Ensure the file has a .pdf extension (case insensitive)
-                if (originalFileName != null && !originalFileName.toLowerCase().endsWith(".pdf")) {
-                    throw new FileValidationException("Only PDF files are allowed!");
+                if (originalFileName != null && !originalFileName.toLowerCase().matches(".*\\.(pdf|docx|png|jpeg|jpg)$")) {
+                    throw new FileValidationException("Only PDF, DOCX, PNG, JPEG, and JPG files are allowed!");
                 }
                 // Ensure the file size is less than 3MB
                 if (fileSize > maxSize) {

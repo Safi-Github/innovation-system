@@ -115,11 +115,11 @@ public class CommitteeController {
         return ResponseEntity.ok(updated);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteCommittee(@PathVariable Long id) {
-        committeeService.deleteCommittee(id);
-        return ResponseEntity.noContent().build();
-    }
+//    @DeleteMapping("/{id}")
+//    public ResponseEntity<?> deleteCommittee(@PathVariable Long id) {
+//        committeeService.deleteCommittee(id);
+//        return ResponseEntity.noContent().build();
+//    }
 
     @GetMapping
     public List<Committee> getAllCommittees() {
