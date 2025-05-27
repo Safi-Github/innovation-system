@@ -343,4 +343,13 @@ public class InnovationService {
             throw new EntityNotFoundException("Innovation with ID " + id + " not found.");
         }
     }
+
+    //count innovation assigned per committee
+    public List<InnovationRepository.CommitteeInnovationCount> getInnovationCountPerCommittee() {
+        return innovationRepository.countInnovationsPerCommittee();
+    }
+    //count innovation assigned for specific committee
+    public long countInnovationByCommittee(Long committeeId) {
+        return innovationRepository.countByCommitteeId(committeeId);
+    }
 }
