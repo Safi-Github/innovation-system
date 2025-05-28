@@ -79,4 +79,18 @@ public class CommentService {
         return ResponseEntity.ok(userComments);
     }
 
+    //get baord member comments for an innovation
+    public ResponseEntity<?> getAllMemberCommentsForInnovation(Long innovationId) {
+        Innovation innovation = innovationRepository.findById(innovationId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Innovation not found"));
+
+        List<CommentDTO> comments = commentRepository.findByInnovationId(innovationId);
+
+        if (comments.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(comments);
+    }
+
 }

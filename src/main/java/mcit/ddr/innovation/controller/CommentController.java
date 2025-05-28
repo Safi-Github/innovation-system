@@ -33,4 +33,10 @@ public class CommentController {
             @PathVariable Long userId) {
         return commentService.getUserCommentsForInnovation(innovationId, userId);
     }
+    
+    //list all the comments related to an innovation
+    @GetMapping("/innovation/{innovationId}/comments")
+    public ResponseEntity<?> getUserCommentsOnInnovation(@PathVariable Long innovationId) {
+        return commentService.getAllMemberCommentsForInnovation(innovationId);
+    }
 }

@@ -31,4 +31,8 @@ public class CommitteeMember {
         this.isHead=isHead;
     }
 
+    public Boolean getIsHead(){
+        return isHead;
+    }
+
 }

@@ -9,6 +9,7 @@ import mcit.ddr.innovation.dto.PartialInnovationUpdateDTO;
 import mcit.ddr.innovation.entity.*;
 import mcit.ddr.innovation.enums.InnovStatus;
 import mcit.ddr.innovation.enums.Role;
+import mcit.ddr.innovation.enums.VoteDecision;
 import mcit.ddr.innovation.exception.ResourceNotFoundException;
 import mcit.ddr.innovation.repository.*;
 import mcit.ddr.innovation.service.FileStorageService;
@@ -20,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -37,6 +39,7 @@ import java.util.EnumMap;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -51,6 +54,8 @@ public class InnovationService {
     private final InnovationHistoryRepository innovationHistoryRepository;
     private final NotificationService notificationService;
     private final CommitteeRepository committeeRepository;
+    private final CommitteeMemberRepository committeeMemberRepository;
+    private final VoteRepository voteRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -118,6 +123,53 @@ public class InnovationService {
         String statusValue = payload.get("status");
         if (statusValue == null || statusValue.isEmpty()) {
             throw new IllegalArgumentException("New Status Param is required");
+        }
+
+        //Check if status is equal to Approved
+        if(innovation.getCommittee() !=null && (InnovStatus.valueOf(statusValue.toUpperCase())==InnovStatus.APPROVED ||
+        InnovStatus.valueOf(statusValue.toUpperCase())==InnovStatus.REJECTED))
+
+            {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String email = auth.getName();
+            MyUser loggedInUser = myUserRepository.findByEmail(email)
+                            .orElseThrow(() -> new RuntimeException("User not found: " + email));
+
+            CommitteeMember member = committeeMemberRepository
+            .findByCommitteeIdAndUserId(innovation.getCommittee().getId(), loggedInUser.getId())
+                    .orElseThrow(() -> new AccessDeniedException("User is not a committee member"));
+
+            //check the user is the committee head
+            if (!Boolean.TRUE.equals(member.getIsHead())) {
+                throw new AccessDeniedException("Only committee head can change the status");
+            }
+
+            // 🔒 Ensure all committee members have voted
+            List<CommitteeMember> committeeMembers = committeeMemberRepository.findByCommitteeId(innovation.getCommittee().getId());
+            Set<Long> votedUserIds = voteRepository.findByInnovationId(innovation.getId()).stream()
+                .map(vote -> vote.getUser().getId())
+                .collect(Collectors.toSet());
+
+            boolean allMembersVoted = committeeMembers.stream()
+                .allMatch(cm -> votedUserIds.contains(cm.getUser().getId()));
+
+            if (!allMembersVoted) {
+                throw new IllegalStateException("All committee members must vote before Final Rejection/Approval.");
+            }
+
+            if(InnovStatus.valueOf(statusValue.toUpperCase())==InnovStatus.APPROVED){
+                // Block approval if any vote is REJECTED
+                boolean hasRejectedVotes = voteRepository.existsByInnovationIdAndDecision(innovation.getId(), VoteDecision.REJECTED);
+                if (hasRejectedVotes) {
+                    throw new IllegalStateException("Cannot approve innovation with rejected votes.");
+                }
+            }else if(InnovStatus.valueOf(statusValue.toUpperCase())==InnovStatus.REJECTED){
+                // Block rejection if no vote is REJECTED
+                boolean hasAtLeastOneRejected = voteRepository.existsByInnovationIdAndDecision(innovation.getId(), VoteDecision.REJECTED);
+                if (!hasAtLeastOneRejected) {
+                    throw new IllegalStateException("Cannot reject innovation without any rejected votes.");
+                }
+            }
         }
 
         InnovStatus newStatus = InnovStatus.valueOf(statusValue.toUpperCase());
@@ -320,4 +372,13 @@ public class InnovationService {
         return innovationRepository.countInnovationsPerCategory();
     }
 
+
+    //count innovation assigned per committee
+    public List<InnovationRepository.CommitteeInnovationCount> getInnovationCountPerCommittee() {
+        return innovationRepository.countInnovationsPerCommittee();
+    }
+    //count innovation assigned for specific committee
+    public long countInnovationByCommittee(Long committeeId) {
+        return innovationRepository.countByCommitteeId(committeeId);
+    }
 }

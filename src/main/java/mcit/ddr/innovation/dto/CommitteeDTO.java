@@ -6,6 +6,6 @@ import lombok.Data;
 public class CommitteeDTO {
 
     private String name;
-    private String describtion;
+    private String description;
     // private Long createdById; // ID of the user creating the committee
 }

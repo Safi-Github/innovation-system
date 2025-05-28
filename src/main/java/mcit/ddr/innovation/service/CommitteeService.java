@@ -33,7 +33,7 @@ public class CommitteeService {
     // public Committee createCommittee(CommitteeDTO dto) {
     //     Committee committee = new Committee();
     //     committee.setName(dto.getName());
-    //     committee.setDescribtion(dto.getDescribtion());
+    //     committee.setDescription(dto.getDescription());
     //     committee.setCreatedDate(LocalDate.now()); 
     //     committee.setIsClosed(false); 
 
@@ -56,7 +56,7 @@ public class CommitteeService {
 
         Committee committee = new Committee();
         committee.setName(dto.getName());
-        committee.setDescribtion(dto.getDescribtion());
+        committee.setDescription(dto.getDescription());
         committee.setCreatedDate(LocalDate.now());  
         committee.setCreatedBy(currentUser);
         committee.setIsClosed(false);
@@ -100,8 +100,8 @@ public class CommitteeService {
             committee.setName(dto.getName());
         }
     
-        if (dto.getDescribtion() != null) {
-            committee.setDescribtion(dto.getDescribtion());
+        if (dto.getDescription() != null) {
+            committee.setDescription(dto.getDescription());
         }
     
         if (file != null && !file.isEmpty()) {

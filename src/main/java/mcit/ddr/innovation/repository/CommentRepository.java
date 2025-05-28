@@ -12,4 +12,6 @@ import java.util.Optional;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
     List<CommentDTO> findByUserIdAndInnovationId(Long userId, Long innovationId);
+
+    List<CommentDTO> findByInnovationId(Long innovationId);
 }

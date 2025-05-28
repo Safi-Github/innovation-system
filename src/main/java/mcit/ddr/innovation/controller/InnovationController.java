@@ -30,6 +30,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.catalina.security.SecurityUtil;
 import org.springframework.core.io.Resource;
@@ -155,9 +161,9 @@ public class InnovationController {
         Long assignerId = Long.parseLong(payload.get("assignerId"));
         Long committeeId = Long.parseLong(payload.get("committeeId"));
         String statusValue = payload.get("status");
-        String comment = payload.get("comment");
+        String consideration = payload.get("consideration");
 
-        InnovationAssignmentResponseDTO updatedInnovation = innovationService.assignInnovation(id, assignerId, committeeId, statusValue, comment);
+        InnovationAssignmentResponseDTO updatedInnovation = innovationService.assignInnovation(id, assignerId, committeeId, statusValue, consideration);
         return ResponseEntity.ok(updatedInnovation);
     }
 
@@ -252,6 +258,29 @@ public class InnovationController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("{\"error\": \"An unexpected error occurred.\"}");
         }
+    }
+
+    //count innovation assigned per each committee
+    @GetMapping("/innovationAssignedPerCommittee")
+    public ResponseEntity<List<Map<String, Object>>> getInnovationCountPerCommittee() {
+        List<InnovationRepository.CommitteeInnovationCount> data = innovationService.getInnovationCountPerCommittee();
+
+        List<Map<String, Object>> response = data.stream().map(d -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("committeeId", d.getCommitteeId());
+            map.put("committeeName", d.getCommitteeName());
+            map.put("totalAssignedInnovation", d.getInnovationCount());
+            return map;
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
+    }
+
+    //count innovation assigned for specific committee
+    @GetMapping("/committees/{committeeId}/innovation-count")
+    public ResponseEntity<Long> getInnovationCountByCommittee(@PathVariable Long committeeId) {
+        long count = innovationService.countInnovationByCommittee(committeeId);
+        return ResponseEntity.ok(count);
     }
 
 

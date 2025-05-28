@@ -59,9 +59,9 @@ public class CommitteeMemberService {
                 .collect(Collectors.toList());
     }
 
-//    public List<UserInCommitteesDTO> getCommitteeSummariesByUserId(Long userId) {
-//        return committeeMemberRepository.findCommitteeSummariesByUserId(userId);
-//    }
+    public List<UserInCommitteesDTO> getCommitteeSummariesByUserId(Long userId) {
+        return committeeMemberRepository.findCommitteeSummariesByUserId(userId);
+    }
 
 //    public List<UserInCommitteesDTO> getCommitteeSummariesByUserId(Long userId) {
 //        List<CommitteeMember> members = committeeMemberRepository.findByUserId(userId);
@@ -132,8 +132,14 @@ public class CommitteeMemberService {
         committeeMemberRepository.deleteByUserIdAndCommitteeId(userId, committeeId);
     }
 
+    //count committees a user is part of 
+    public Long countCommitteesByUserId(Long userId) {
+        return committeeMemberRepository.countCommitteesByUserId(userId);
+    }
 
-
-
+    //count members per committee
+    public List<CommitteeMemberRepository.CommitteeUserCount> getUserCountPerCommittee() {
+        return committeeMemberRepository.countUsersPerCommittee();
+    }
 
 }

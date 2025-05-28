@@ -22,7 +22,7 @@ public class Committee {
     private String name;
 
     @Column(columnDefinition = "TEXT")
-    private String describtion;
+    private String description;
 
     @ManyToOne
     @JoinColumn(name = "created_by")
@@ -47,7 +47,7 @@ public class Committee {
     public void setIsClosed(boolean isClosed) {
         this.isClosed=isClosed;
     }
-    public void setDescribtion(String describtion) {
-        this.describtion = describtion;
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
