@@ -25,7 +25,7 @@ public class Review {
 
     private LocalDate createdDate;
 
-    private String comment;
+    private String consideration;
 
     @ManyToOne
     @JoinColumn(name = "assigned_to_id", nullable = true)
@@ -72,12 +72,12 @@ public class Review {
         this.createdDate = createdDate;
     }
 
-    public String getComment() {
-        return comment;
+    public String getConsideration() {
+        return consideration;
     }
 
-    public void setComment(String comment) {
-        this.comment = comment;
+    public void setConsideration(String consideration) {
+        this.consideration = consideration;
     }
 
     public Committee getAssignedTo() {

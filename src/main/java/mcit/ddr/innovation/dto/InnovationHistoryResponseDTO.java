@@ -25,7 +25,6 @@ public class InnovationHistoryResponseDTO{
 
     private String title;
     private String purpose;
-    private String category;
     private String description;
     private String additionalInfo;
     private String reasonsProvingYouCanInvent;

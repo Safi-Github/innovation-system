@@ -23,6 +23,6 @@ public class InnovationStatusChangeResponseDTO {
     // private MyUser assignedTo; // The board member (assigned person)
 
     private LocalDate createdDate; // The date of the assignment
-    private String comment;
+    private String consideration;
 
 }

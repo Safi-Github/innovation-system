@@ -28,10 +28,8 @@ import org.springframework.data.domain.Page;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import org.apache.catalina.security.SecurityUtil;
 import org.springframework.core.io.Resource;
@@ -257,4 +255,24 @@ public class InnovationController {
     }
 
 
+    @GetMapping("/count-by-status")
+    public ResponseEntity<Map<String, Long>> countInnovationsByStatus() {
+        Map<String, Long> counts = innovationService.countInnovationsByStatus();
+        return ResponseEntity.ok(counts);
+    }
+
+
+    @GetMapping("/innovationPerCategory")
+    public ResponseEntity<List<Map<String, Object>>> getInnovationCountPerCategory() {
+        List<InnovationRepository.CategoryInnovationCount> data = innovationService.getInnovationCountPerCategory();
+
+        List<Map<String, Object>> response = data.stream().map(d -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("categoryName", d.getCategoryName());
+            map.put("totalInnovation", d.getInnovationCount());
+            return map;
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
+    }
 }

@@ -49,23 +49,22 @@ public class ReviewService {
                             r.getStateChangedTo(),
                             r.getCreatedBy(),
                             r.getCreatedDate(),
-                            r.getComment()
-                            // r.getInnovationHistory() != null && parsedData != null
-                            //     ? new InnovationHistoryResponseDTO(
-                            //         r.getInnovationHistory().getId(),
-                            //         parsedData.getTitle(),
-                            //         parsedData.getPurpose(),
-                            //         parsedData.getCategory(),
-                            //         parsedData.getDescription(),
-                            //         parsedData.getAdditionalInfo(),
-                            //         parsedData.getReasonsProvingYouCanInvent(),
-                            //         parsedData.getImpact(),
-                            //         parsedData.getResourcesNeeded(),
-                            //         parsedData.getAttachment(),
-                            //         r.getInnovationHistory().getDateCreated(),
-                            //         null // don't include archivedInnovationData in the response
-                            //     )
-                            //     : null
+                            r.getConsideration(),
+                             r.getInnovationHistory() != null && parsedData != null
+                                 ? new InnovationHistoryResponseDTO(
+                                     r.getInnovationHistory().getId(),
+                                     parsedData.getTitle(),
+                                     parsedData.getPurpose(),
+                                     parsedData.getDescription(),
+                                     parsedData.getAdditionalInfo(),
+                                     parsedData.getReasonsProvingYouCanInvent(),
+                                     parsedData.getImpact(),
+                                     parsedData.getResourcesNeeded(),
+                                     parsedData.getAttachment(),
+                                     r.getInnovationHistory().getDateCreated(),
+                                     null // don't include archivedInnovationData in the response
+                                 )
+                                 : null
                     );
 
                 })

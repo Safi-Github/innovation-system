@@ -96,7 +96,7 @@ public class UserController {
 
         // Save the updated user
         myUserRepository.save(user);
-    
+
         return ResponseEntity.ok(user);
     }
 
@@ -128,7 +128,7 @@ public class UserController {
         List<Map<String, String>> roles = Arrays.stream(Role.values())
             .map(role -> Map.of("name", role.getDisplayName(), "value", role.name()))
             .collect(Collectors.toList());
-    
+
         return ResponseEntity.ok(roles);
     }
 
@@ -170,4 +170,23 @@ public class UserController {
         // Return a success response
         return ResponseEntity.ok("Password changed successfully.");
     }
+
+    @GetMapping("/users/count-user-status")
+    public ResponseEntity<Map<String, Long>> getUserStats() {
+        long activeCount = myUserRepository.countByIsActiveTrue();
+        long inactiveCount = myUserRepository.countByIsActiveFalse();
+        long totalCount = myUserRepository.count(); // built-in method
+
+        Map<String, Long> stats = Map.of(
+                "activeUsers", activeCount,
+                "inactiveUsers", inactiveCount,
+                "totalUsers", totalCount
+        );
+
+        return ResponseEntity.ok(stats);
+    }
+
+
+
+
 }

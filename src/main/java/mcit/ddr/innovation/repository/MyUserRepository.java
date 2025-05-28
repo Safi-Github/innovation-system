@@ -23,6 +23,13 @@ public interface MyUserRepository extends JpaRepository<MyUser, Long> {
 
     List<MyUser> findByRole(Role role);
 
+    // Add these methods to your repository
+    long countByIsActiveTrue();
+    long countByIsActiveFalse();
+    long count(); // No need to write @Query
+
+
+
 //  Optional<MyUser> findByEmailVerificationToken(String token);
 
 

@@ -148,8 +148,8 @@ public class ForgotPasswordService {
                 forgotPassword.getOtpExpirationDate().isAfter(LocalDateTime.now());
     }
 
-    private String generateResetToken(String username) {
-        return jwtUtilityClass.generateResetToken(username);
+    private String generateResetToken(String email) {
+        return jwtUtilityClass.generateResetToken(email);
     }
 
     private String validateResetToken(String token) {

@@ -33,6 +33,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import java.util.EnumMap;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -128,63 +129,68 @@ public class InnovationService {
 
         Review log = new Review();
         log.setStateChangedTo(newStatus);
-        log.setComment(payload.get("comment"));
+        log.setConsideration(payload.get("consideration"));
         log.setCreatedBy(stateChangedByUser);
         log.setCreatedDate(LocalDate.now());
         log.setInnovation(innovation);
         Review savedLog = reviewRepository.save(log);
 
-//      innovation history versioning part commented
-//        if (savedLog.getStateChangedTo() == InnovStatus.REJECTED) {
-//            System.out.println(savedLog.getStateChangedTo());
-//            try {
-//                // Convert the rejected innovation to JSON
-//                Map<String, Object> snapshot = new HashMap<>();
-//                snapshot.put("id", innovation.getId());
-//                snapshot.put("title", innovation.getTitle());
-//                snapshot.put("purpose", innovation.getPurpose());
-//                snapshot.put("category", innovation.getCategory());
-//                snapshot.put("description", innovation.getDescription());
-//                snapshot.put("additionalInfo", innovation.getAdditionalInfo());
-//                snapshot.put("reasonsProvingYouCanInvent", innovation.getReasonsProvingYouCanInvent());
-//                snapshot.put("impact", innovation.getImpact());
-//                snapshot.put("resourcesNeeded", innovation.getResourcesNeeded());
-//                snapshot.put("attachment", innovation.getAttachment());
-//
-//                String innovationJson = objectMapper.writeValueAsString(snapshot);
-//                System.out.println(innovationJson);
-//
-//                InnovationHistory innovHistory = new InnovationHistory();
-//                innovHistory.setArchivedInnovationData(innovationJson);
-//                innovHistory.setDateCreated(LocalDate.now());
-//                innovHistory.setReview(savedLog);
-//                innovHistory.setInnovation(innovation);
-//                innovationHistoryRepository.save(innovHistory);
-//
-//            } catch (JsonProcessingException e) {
-//                logger.error("Failed to convert innovation to JSON for history log", e);
-//                // Optionally, throw or handle
-//            }
-//
-//        }
+        //innovation history versioning part commented
+        if (savedLog.getStateChangedTo() == InnovStatus.REJECTED) {
+            System.out.println(savedLog.getStateChangedTo());
+            try {
+                // Convert the rejected innovation to JSON
+                Map<String, Object> snapshot = new HashMap<>();
+                snapshot.put("id", innovation.getId());
+                snapshot.put("title", innovation.getTitle());
+                snapshot.put("purpose", innovation.getPurpose());
+                snapshot.put("category", innovation.getCategory());
+                snapshot.put("description", innovation.getDescription());
+                snapshot.put("additionalInfo", innovation.getAdditionalInfo());
+                snapshot.put("reasonsProvingYouCanInvent", innovation.getReasonsProvingYouCanInvent());
+                snapshot.put("impact", innovation.getImpact());
+                snapshot.put("resourcesNeeded", innovation.getResourcesNeeded());
+                snapshot.put("attachment", innovation.getAttachment());
 
-//        notification part commented
-//        String contentUrlInnovator = "http://localhost:3000/dashboard/innovator/review/" + innovation.getId();
-//        String contentUrlBoardMember = "http://localhost:3000/dashboard/boardmember/review/" + innovation.getId();
-//        if (savedLog.getStateChangedTo() == InnovStatus.APPROVED || savedLog.getStateChangedTo() == InnovStatus.REJECTED) {
-//            notificationService.sendNotification(
-//                    innovation.getCreatedBy().getId(),
-//                    "Your Innovation Tittled \"" + innovation.getTitle() + "\" has been " + savedLog.getStateChangedTo().name().toLowerCase() + "",
-//                    contentUrlInnovator
-//            );
-//        }
-//        if (savedLog.getStateChangedTo() == InnovStatus.RESUBMITTED && innovation.getCommittee()!=null) {
-//            notificationService.sendNotification(
-//                    innovation.getCommittee().getId(),
-//                    "Innovation Tittled \"" + innovation.getTitle() + "\" has been " + savedLog.getStateChangedTo().name().toLowerCase() + "to You",
-//                    contentUrlBoardMember
-//            );
-//        }
+                String innovationJson = objectMapper.writeValueAsString(snapshot);
+                System.out.println(innovationJson);
+
+                InnovationHistory innovHistory = new InnovationHistory();
+                innovHistory.setArchivedInnovationData(innovationJson);
+                innovHistory.setDateCreated(LocalDate.now());
+                innovHistory.setReview(savedLog);
+                innovHistory.setInnovation(innovation);
+                innovationHistoryRepository.save(innovHistory);
+
+            } catch (JsonProcessingException e) {
+                logger.error("Failed to convert innovation to JSON for history log", e);
+                // Optionally, throw or handle
+            }
+
+        }
+
+//      notification part commented
+        String contentUrlInnovator = "http://localhost:3000/en/dashboard/innovator/review" + innovation.getId();
+        String contentUrlBoardMember = "http://localhost:3000/en/dashboard/board/review" + innovation.getId();
+        if (savedLog.getStateChangedTo() == InnovStatus.APPROVED || savedLog.getStateChangedTo() == InnovStatus.REJECTED) {
+            notificationService.sendNotification(
+                    innovation.getCreatedBy().getId(),
+                    "Your Innovation Tittled \"" + innovation.getTitle() + "\" has been " + savedLog.getStateChangedTo().name().toLowerCase() + "",
+                    contentUrlInnovator
+            );
+        }
+
+        if (savedLog.getStateChangedTo() == InnovStatus.RESUBMITTED && innovation.getCommittee() != null) {
+            for (CommitteeMember member : innovation.getCommittee().getMembers()) {
+                notificationService.sendNotification(
+                        member.getUser().getId(),
+                        "Innovation titled \"" + innovation.getTitle() + "\" has been " +
+                                 "Resubmitted to the committee you are part of.",
+                        contentUrlBoardMember
+                );
+            }
+        }
+
 
         return new InnovationStatusChangeResponseDTO(
                 innovation.getId(),
@@ -192,13 +198,13 @@ public class InnovationService {
                 innovation.getStatus(),
                 stateChangedByUser,
                 log.getCreatedDate(),
-                log.getComment()
+                log.getConsideration()
         );
     }
 
     //Innovation Assignment Service
     @Transactional
-    public InnovationAssignmentResponseDTO assignInnovation(Long innovationId, Long assignerId, Long committeeId, String status, String comment) {
+    public InnovationAssignmentResponseDTO assignInnovation(Long innovationId, Long assignerId, Long committeeId, String status, String consideration) {
         Innovation innovation = innovationRepository.findById(innovationId)
                 .orElseThrow(() -> new RuntimeException("Innovation not found"));
 
@@ -222,29 +228,31 @@ public class InnovationService {
         log.setStateChangedTo(InnovStatus.valueOf(status.toUpperCase()));
         log.setCreatedBy(assigner);
         log.setCreatedDate(LocalDate.now());
-        log.setComment(comment);
+        log.setConsideration(consideration);
         log.setAssignedTo(committee);
         log.setInnovation(innovation);
         Review savedLog = reviewRepository.save(log);
 
-//        notification part commented
-//        String contentUrlInnovator = "http://localhost:3000/dashboard/innovator/review/" + innovation.getId();
-//        String contentUrlBoardMember = "http://localhost:3000/dashboard/boardmember/review/" + innovation.getId();
-//        if (savedLog.getStateChangedTo() == InnovStatus.ASSIGNED) {
-//
-//            notificationService.sendNotification(
-//                    innovation.getCreatedBy().getId(),
-//                    "Your Innovation Tittled \"" + innovation.getTitle() + "\" has been " + savedLog.getStateChangedTo().name().toLowerCase() + "",
-//                    contentUrlInnovator
-//            );
-//            if(innovation.getCommittee() !=null){
-//                notificationService.sendNotification(
-//                        innovation.getCommittee().getId(),
-//                        "Innovation Tittled \"" + innovation.getTitle() + "\" has been " + savedLog.getStateChangedTo().name().toLowerCase() + "to You",
-//                        contentUrlBoardMember
-//                );
-//            }
-//        }
+//      notification part commented
+        String contentUrlInnovator = "http://localhost:3000/en/dashboard/innovator/review/" + innovation.getId();
+        String contentUrlBoardMember = "http://localhost:3000/en/dashboard/board/review/" + innovation.getId();
+        if (savedLog.getStateChangedTo() == InnovStatus.ASSIGNED) {
+            notificationService.sendNotification(
+                    innovation.getCreatedBy().getId(),
+                    "Your Innovation Tittled \"" + innovation.getTitle() + "\" has been Assigned",
+                    contentUrlInnovator
+            );
+            if(innovation.getCommittee() !=null){
+                for (CommitteeMember member : innovation.getCommittee().getMembers()) {
+                    notificationService.sendNotification(
+                                member.getUser().getId(),
+                                "Innovation titled \"" + innovation.getTitle() + "\" has been " +
+                                        "Assigned to the committee you are part of.",
+                                contentUrlBoardMember
+                        );
+                    }
+                }
+        }
 
         return new InnovationAssignmentResponseDTO(
                 innovation.getId(),
@@ -253,7 +261,7 @@ public class InnovationService {
                 innovation.getCommittee(),
                 innovation.getAssigner(),
                 log.getCreatedDate(),
-                log.getComment()
+                log.getConsideration()
         );
     }
 
@@ -291,4 +299,25 @@ public class InnovationService {
             throw new EntityNotFoundException("Innovation with ID " + id + " not found.");
         }
     }
+
+
+
+
+    public Map<String, Long> countInnovationsByStatus() {
+        Map<String, Long> result = new HashMap<>();
+
+        for (InnovStatus status : InnovStatus.values()) {
+            if (status != InnovStatus.DRAFT) {
+                long count = innovationRepository.countByStatus(status);
+                result.put(status.name(), count);
+            }
+        }
+
+        return result;
+    }
+
+    public List<InnovationRepository.CategoryInnovationCount> getInnovationCountPerCategory() {
+        return innovationRepository.countInnovationsPerCategory();
+    }
+
 }

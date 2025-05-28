@@ -39,9 +39,9 @@ public class VoteService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Innovation not found"));
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
-        MyUser loggedInUser = myUserRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+        String email = auth.getName();
+        MyUser loggedInUser = myUserRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found: " + email));
 
         CommitteeMember member = committeeMemberRepository
                 .findByCommitteeIdAndUserId(innovation.getCommittee().getId(), loggedInUser.getId())
@@ -80,9 +80,9 @@ public class VoteService {
     public ResponseEntity<?> getVoteForLoggedInUser(Long innovationId) {
         // Get current authenticated user
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
-        MyUser user = myUserRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+        String email = auth.getName();
+        MyUser user = myUserRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found: " + email));
 
         Optional<Vote> voteOpt = voteRepository.findByUserIdAndInnovationId(user.getId(), innovationId);
 
