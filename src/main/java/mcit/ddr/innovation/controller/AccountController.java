@@ -63,17 +63,17 @@ public class AccountController {
     public ResponseEntity<?> createUser(@RequestPart("user") MyUser user,
                                         @RequestPart(value = "image", required = false) MultipartFile imageFile) {
 
-//        String token = UUID.randomUUID().toString();
-//        user.setEmailVerificationToken(token);
-//        user.setIsEmailVerified(false);
-//
-//        // Send verification email
-//        String verificationUrl = "http://localhost:8080/api/verify-email?token=" + token;
-//        SimpleMailMessage message = new SimpleMailMessage();
-//        message.setTo(user.getEmail());
-//        message.setSubject("Email Verification - Innovation Management System");
-//        message.setText("Please verify your email by clicking the link: " + verificationUrl);
-//        mailSender.send(message);
+        String token = UUID.randomUUID().toString();
+        user.setEmailVerificationToken(token);
+        user.setIsEmailVerified(false);
+
+        // Send verification email
+        String verificationUrl = "http://localhost:3000/api/verify-email?token=" + token;
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(user.getEmail());
+        message.setSubject("Email Verification - Innovation Management System");
+        message.setText("Please verify your email by clicking the link: " + verificationUrl);
+        mailSender.send(message);
 
 
         // Check for existing username
@@ -111,21 +111,21 @@ public class AccountController {
         return ResponseEntity.ok(savedUser);
     }
 
-//    @GetMapping("/verify-email")
-//    public ResponseEntity<?> verifyEmail(@RequestParam String token) {
-//        Optional<MyUser> userOpt = myUserRepository.findByEmailVerificationToken(token);
-//
-//        if (userOpt.isEmpty()) {
-//            return ResponseEntity.badRequest().body("Invalid verification token.");
-//        }
-//
-//        MyUser user = userOpt.get();
-//        user.setIsEmailVerified(true);
-//        user.setEmailVerificationToken(null); // Clear token after successful verification
-//        myUserRepository.save(user);
-//
-//        return ResponseEntity.ok("Email verified successfully. You can now log in.");
-//    }
+    @GetMapping("/verify-email")
+    public ResponseEntity<?> verifyEmail(@RequestParam String token) {
+        Optional<MyUser> userOpt = myUserRepository.findByEmailVerificationToken(token);
+
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("Invalid verification token.");
+        }
+
+        MyUser user = userOpt.get();
+        user.setIsEmailVerified(true);
+        user.setEmailVerificationToken(null); // Clear token after successful verification
+        myUserRepository.save(user);
+
+        return ResponseEntity.ok("Email verified successfully. You can now log in.");
+    }
 
 
 
@@ -134,8 +134,8 @@ public class AccountController {
     //and also the dto we was created for the user profile also not needed now
     @GetMapping("/profile")
     public ResponseEntity<UserProfileDTO> getProfile(@RequestHeader("Authorization") String token) {
-        String username = extractUsernameFromToken(token);
-        Optional<MyUser> userOpt = myUserRepository.findByUsername(username);
+        String email = extractUsernameFromToken(token);
+        Optional<MyUser> userOpt = myUserRepository.findByEmail(email);
 
         if (userOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -146,14 +146,13 @@ public class AccountController {
 
 
 
-    // Endpoint to update the user's profile image
     @PutMapping(value = "/profile", consumes = {"multipart/form-data"})
     public ResponseEntity<UserProfileDTO> updateProfile(
             @RequestHeader("Authorization") String token,
             @RequestPart(value = "image", required = false) MultipartFile imageFile) {
 
-        String username = extractUsernameFromToken(token);
-        Optional<MyUser> userOpt = myUserRepository.findByUsername(username);
+        String email = extractUsernameFromToken(token);
+        Optional<MyUser> userOpt = myUserRepository.findByEmail(email);
 
         if (userOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -162,14 +161,20 @@ public class AccountController {
         MyUser user = userOpt.get();
 
         if (imageFile != null && !imageFile.isEmpty()) {
-            String profileImagePath = fileStorageService.saveProfileImage(imageFile, username);
+            // Delete previous profile image if it exists
+            if (user.getProfileImage() != null) {
+                fileStorageService.deleteFile(user.getProfileImage());
+            }
+
+            // Save new image
+            String profileImagePath = fileStorageService.saveProfileImage(imageFile, email);
             user.setProfileImage(profileImagePath);
         }
 
         MyUser updatedUser = myUserRepository.save(user);
-
         return ResponseEntity.ok(new UserProfileDTO(updatedUser));
     }
+
 
 
     // Endpoint to retrieve user's profile image

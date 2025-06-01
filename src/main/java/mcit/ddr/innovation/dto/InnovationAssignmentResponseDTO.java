@@ -11,13 +11,21 @@ import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class InnovationAssignmentResponseDTO {
-    private Long id;
-    private String tittle;
-    private InnovStatus stateChangedTo;
-    private Committee committee;   // Assigned to Committee
-    private MyUser createdBy;    // Assigner
-    private LocalDate createdDate; // Date of the assignment
+    private Long innovationId;
+    private String innovationTitle;
+    private String status;
+    private String committeeName;
+    private String assignedBy;
     private String consideration;
+
+    public InnovationAssignmentResponseDTO(Long innovationId, String innovationTitle, String status, String committeeName, String assignedBy, String consideration) {
+        this.innovationId = innovationId;
+        this.innovationTitle = innovationTitle;
+        this.status = status;
+        this.committeeName = committeeName;
+        this.assignedBy = assignedBy;
+        this.consideration = consideration;
+    }
 }
+

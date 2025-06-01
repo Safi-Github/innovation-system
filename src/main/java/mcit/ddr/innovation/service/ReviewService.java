@@ -45,27 +45,28 @@ public class ReviewService {
                     }
 
                     return new ReviewLogsResponseDTO(
-                            r.getId(),
-                            r.getStateChangedTo(),
-                            r.getCreatedBy(),
-                            r.getCreatedDate(),
+                                                r.getId(),
+                                                r.getStateChangedTo(),
+                                                r.getCreatedBy(),
+                                                r.getCreatedDate(),
                             r.getConsideration(),
-                             r.getInnovationHistory() != null && parsedData != null
-                                 ? new InnovationHistoryResponseDTO(
-                                     r.getInnovationHistory().getId(),
-                                     parsedData.getTitle(),
-                                     parsedData.getPurpose(),
-                                     parsedData.getDescription(),
-                                     parsedData.getAdditionalInfo(),
-                                     parsedData.getReasonsProvingYouCanInvent(),
-                                     parsedData.getImpact(),
-                                     parsedData.getResourcesNeeded(),
-                                     parsedData.getAttachment(),
-                                     r.getInnovationHistory().getDateCreated(),
-                                     null // don't include archivedInnovationData in the response
-                                 )
-                                 : null
-                    );
+                            r.getAssignedTo(),
+                                                 r.getInnovationHistory() != null && parsedData != null
+                                                     ? new InnovationHistoryResponseDTO(
+                                                         r.getInnovationHistory().getId(),
+                                                         parsedData.getTitle(),
+                                                         parsedData.getPurpose(),
+                                                         parsedData.getDescription(),
+                                                         parsedData.getAdditionalInfo(),
+                                                         parsedData.getReasonsProvingYouCanInvent(),
+                                                         parsedData.getImpact(),
+                                                         parsedData.getResourcesNeeded(),
+                                                         parsedData.getAttachment(),
+                                                         r.getInnovationHistory().getDateCreated(),
+                                                         null // don't include archivedInnovationData in the response
+                                                     )
+                                                     : null
+                                        );
 
                 })
                 .collect(Collectors.toList());

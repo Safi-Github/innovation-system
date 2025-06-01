@@ -309,12 +309,12 @@ public class InnovationService {
         return new InnovationAssignmentResponseDTO(
                 innovation.getId(),
                 innovation.getTitle(),
-                innovation.getStatus(),
-                innovation.getCommittee(),
-                innovation.getAssigner(),
-                log.getCreatedDate(),
+                innovation.getStatus().name(),
+                committee.getName(),
+                assigner.getUsername(),
                 log.getConsideration()
         );
+
     }
 
     public Page<Innovation> searchInnovations(InnovationSearchCriteriaDTO criteria, int page, int size, String[] sort) {
