@@ -1,5 +1,6 @@
 package mcit.ddr.innovation.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -40,9 +41,10 @@ public class Committee {
     private List<CommitteeMember> members = new ArrayList<>();
 
 
-    @OneToMany(mappedBy = "committee", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @OneToMany(mappedBy = "committee")
+    @JsonBackReference
     private List<Innovation> innovations;
+
 
     public void setIsClosed(boolean isClosed) {
         this.isClosed=isClosed;

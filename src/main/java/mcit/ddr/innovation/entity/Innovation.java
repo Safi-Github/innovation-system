@@ -1,9 +1,6 @@
 package mcit.ddr.innovation.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.*;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -79,9 +76,9 @@ public class Innovation {
 
     @ManyToOne
     @JoinColumn(name = "committee_id")
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "members"})
-    @JsonBackReference
+    @JsonManagedReference
     private Committee committee;
+
 
     // Audit fields
     @CreatedBy
