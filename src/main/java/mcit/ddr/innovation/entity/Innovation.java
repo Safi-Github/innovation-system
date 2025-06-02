@@ -1,6 +1,9 @@
 package mcit.ddr.innovation.entity;
 
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -76,7 +79,6 @@ public class Innovation {
 
     @ManyToOne
     @JoinColumn(name = "committee_id")
-    @JsonManagedReference
     private Committee committee;
 
 

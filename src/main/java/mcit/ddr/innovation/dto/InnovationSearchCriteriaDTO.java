@@ -1,19 +1,16 @@
 package mcit.ddr.innovation.dto;
 
-import lombok.Data;
-import mcit.ddr.innovation.entity.Committee;
-import mcit.ddr.innovation.entity.MyUser;
-// import mcit.ddr.innovation.enums.Category;
-import mcit.ddr.innovation.enums.InnovStatus;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
+import mcit.ddr.innovation.enums.InnovStatus;
+
 import java.util.Date;
 
 @Getter
 @Setter
-@Data
 public class InnovationSearchCriteriaDTO {
+    private String title;
     private String category;
     private InnovStatus status;
 
@@ -26,8 +23,8 @@ public class InnovationSearchCriteriaDTO {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date assignedDate;
 
-    private MyUser assigner;
-    // private MyUser boardMember;
-    private Committee committee;
-    private MyUser createdBy;
+    // Replacing heavy object with minimal info
+    private String assigner;
+    private String createdBy;
+    private String committee;
 }
