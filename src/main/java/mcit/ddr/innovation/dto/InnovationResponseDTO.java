@@ -4,6 +4,7 @@ import lombok.Data;
 import mcit.ddr.innovation.entity.Category;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 public class InnovationResponseDTO {
@@ -16,12 +17,15 @@ public class InnovationResponseDTO {
     private String reasonsProvingYouCanInvent;
     private String impact;
     private String resourcesNeeded;
-
     private Boolean isAssigned;
     private Date assignedDate;
+
+    private Date createdDate;
 
     private Category category;
     private AdminUserDTO assigner;
     private AdminUserDTO createdBy;
     private CommitteeDTO assignedTo;
+
+    private List<InvolvedPersonDTO> involvedPersons;
 }

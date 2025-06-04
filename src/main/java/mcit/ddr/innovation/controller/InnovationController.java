@@ -214,6 +214,7 @@ public class InnovationController {
         return ResponseEntity.ok(response);
     }
 
+
     private InnovationResponseDTO mapToDTO(Innovation innovation) {
         InnovationResponseDTO dto = new InnovationResponseDTO();
         dto.setId(innovation.getId());
@@ -227,8 +228,25 @@ public class InnovationController {
         dto.setResourcesNeeded(innovation.getResourcesNeeded());
         dto.setIsAssigned(innovation.getIsAssigned());
         dto.setAssignedDate(innovation.getAssignedDate());
+        dto.setCreatedDate(innovation.getCreateDate());
+        List<InvolvedPersonDTO> involvedPersonDTOs = innovation.getInvolvedPersons().stream().map(person -> {
+            InvolvedPersonDTO dto1 = new InvolvedPersonDTO();
+            dto1.setId(person.getId());
+            dto1.setFirstname(person.getFirstname());
+            dto1.setFathername(person.getFathername());
+            dto1.setNid(person.getNid());
+            dto1.setLastname(person.getLastname());
+            dto1.setPhone(person.getPhone());
+            dto1.setEmail(person.getEmail());
+            dto1.setPersonType(person.getPersonType());
+            dto1.setInvolvedPercentage(person.getInvolvedPercentage());
+            return dto1;
+        }).collect(Collectors.toList());
 
-        // Map category
+        dto.setInvolvedPersons(involvedPersonDTOs);
+
+
+
         if (innovation.getCategory() != null) {
             Category catDto = new Category();
             catDto.setId(innovation.getCategory().getId());
@@ -236,11 +254,9 @@ public class InnovationController {
             dto.setCategory(catDto);
         }
 
-        // Map assigner and creator
         dto.setAssigner(mapUserToAdminDTO(innovation.getAssigner()));
         dto.setCreatedBy(mapUserToAdminDTO(innovation.getCreatedBy()));
 
-        // Map committee
         if (innovation.getCommittee() != null) {
             CommitteeDTO committeeDto = new CommitteeDTO();
             committeeDto.setId(innovation.getCommittee().getId());
@@ -253,7 +269,7 @@ public class InnovationController {
                         if (user == null) return null;
 
                         AdminUserDTO dtoMember = mapUserToAdminDTO(user);
-                        dtoMember.setIsHead(member.getIsHead()); // Important: Set head flag
+                        dtoMember.setIsHead(member.getIsHead());
                         return dtoMember;
                     })
                     .filter(Objects::nonNull)
@@ -264,9 +280,9 @@ public class InnovationController {
         }
 
         return dto;
-}
+    }
 
-    // ✅ Helper method
+
     private AdminUserDTO mapUserToAdminDTO(MyUser user) {
         if (user == null) return null;
 
@@ -282,9 +298,11 @@ public class InnovationController {
                 user.getUsername(),
                 user.getRole()
         );
-        // isHead will be set externally during mapping from CommitteeMember
+
+        // isHead is set externally (from CommitteeMember)
         return dto;
     }
+
 
 
 
