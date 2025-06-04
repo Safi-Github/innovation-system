@@ -2,12 +2,8 @@ package mcit.ddr.innovation.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import mcit.ddr.innovation.dto.InnovationAssignmentResponseDTO;
-import mcit.ddr.innovation.dto.InnovationPaginatedResponseDTO;
-import mcit.ddr.innovation.dto.InnovationSearchCriteriaDTO;
-import mcit.ddr.innovation.dto.InnovationStatusChangeResponseDTO;
-import mcit.ddr.innovation.dto.PartialInnovationUpdateDTO;
-import mcit.ddr.innovation.entity.Innovation;
+import mcit.ddr.innovation.dto.*;
+import mcit.ddr.innovation.entity.*;
 import mcit.ddr.innovation.repository.InnovationRepository;
 import mcit.ddr.innovation.repository.ReviewRepository;
 import mcit.ddr.innovation.repository.MyUserRepository;
@@ -30,12 +26,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.apache.catalina.security.SecurityUtil;
 import org.springframework.core.io.Resource;
@@ -196,26 +189,106 @@ public class InnovationController {
     // }
 
     @GetMapping
-    public ResponseEntity<InnovationPaginatedResponseDTO> searchInnovations(
-        InnovationSearchCriteriaDTO criteria, // Using DTO
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "5") int size,
-        @RequestParam(defaultValue = "id,asc") String[] sort) {
+    public ResponseEntity<InnovationPaginatedResponseDTO<InnovationResponseDTO>> searchInnovations(
+            InnovationSearchCriteriaDTO criteria,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "id,asc") String[] sort) {
 
         Page<Innovation> result = innovationService.searchInnovations(criteria, page, size, sort);
-        
-        InnovationPaginatedResponseDTO<Innovation> response = new InnovationPaginatedResponseDTO<>(
-            result.getContent(),
-            result.getNumber(),
-            result.getSize(),
-            result.getTotalElements(),
-            result.getTotalPages(),
-            result.hasNext(),
-            result.hasPrevious()
+
+        List<InnovationResponseDTO> dtoList = result.getContent().stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+
+        InnovationPaginatedResponseDTO<InnovationResponseDTO> response = new InnovationPaginatedResponseDTO<>(
+                dtoList,
+                result.getNumber(),
+                result.getSize(),
+                result.getTotalElements(),
+                result.getTotalPages(),
+                result.hasNext(),
+                result.hasPrevious()
         );
-    
+
         return ResponseEntity.ok(response);
     }
+
+    private InnovationResponseDTO mapToDTO(Innovation innovation) {
+        InnovationResponseDTO dto = new InnovationResponseDTO();
+        dto.setId(innovation.getId());
+        dto.setTitle(innovation.getTitle());
+        dto.setDescription(innovation.getDescription());
+        dto.setPurpose(innovation.getPurpose());
+        dto.setAdditionalInfo(innovation.getAdditionalInfo());
+        dto.setStatus(innovation.getStatus().toString());
+        dto.setReasonsProvingYouCanInvent(innovation.getReasonsProvingYouCanInvent());
+        dto.setImpact(innovation.getImpact());
+        dto.setResourcesNeeded(innovation.getResourcesNeeded());
+        dto.setIsAssigned(innovation.getIsAssigned());
+        dto.setAssignedDate(innovation.getAssignedDate());
+
+        // Map category
+        if (innovation.getCategory() != null) {
+            Category catDto = new Category();
+            catDto.setId(innovation.getCategory().getId());
+            catDto.setName(innovation.getCategory().getName());
+            dto.setCategory(catDto);
+        }
+
+        // Map assigner and creator
+        dto.setAssigner(mapUserToAdminDTO(innovation.getAssigner()));
+        dto.setCreatedBy(mapUserToAdminDTO(innovation.getCreatedBy()));
+
+        // Map committee
+        if (innovation.getCommittee() != null) {
+            CommitteeDTO committeeDto = new CommitteeDTO();
+            committeeDto.setId(innovation.getCommittee().getId());
+            committeeDto.setName(innovation.getCommittee().getName());
+            committeeDto.setDescription(innovation.getCommittee().getDescription());
+
+            List<AdminUserDTO> memberDTOs = innovation.getCommittee().getMembers().stream()
+                    .map(member -> {
+                        MyUser user = member.getUser();
+                        if (user == null) return null;
+
+                        AdminUserDTO dtoMember = mapUserToAdminDTO(user);
+                        dtoMember.setIsHead(member.getIsHead()); // Important: Set head flag
+                        return dtoMember;
+                    })
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+
+            committeeDto.setMembers(memberDTOs);
+            dto.setAssignedTo(committeeDto);
+        }
+
+        return dto;
+}
+
+    // ✅ Helper method
+    private AdminUserDTO mapUserToAdminDTO(MyUser user) {
+        if (user == null) return null;
+
+        AdminUserDTO dto = new AdminUserDTO(
+                user.getId(),
+                user.getFirstname(),
+                user.getLastname(),
+                user.getFathername(),
+                user.getNid(),
+                user.getPhone(),
+                user.getLiteracyLevel(),
+                user.getEmail(),
+                user.getUsername(),
+                user.getRole()
+        );
+        // isHead will be set externally during mapping from CommitteeMember
+        return dto;
+    }
+
+
+
+
 
 
     @GetMapping("/{id}")

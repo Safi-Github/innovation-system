@@ -97,9 +97,10 @@ public class CommitteeController {
                 long fileSize = file.getSize();
                 long maxSize = 3 * 1024 * 1024; // 3MB
 
-                if (originalFileName != null && !originalFileName.toLowerCase().endsWith(".pdf")) {
-                    throw new FileValidationException("Only PDF files are allowed!");
+                if (originalFileName != null && !originalFileName.toLowerCase().matches(".*\\.(pdf|docx|png|jpeg|jpg)$")) {
+                    throw new FileValidationException("Only PDF, DOCX, PNG, JPEG, and JPG files are allowed!");
                 }
+
                 if (fileSize > maxSize) {
                     throw new FileValidationException("File size must be less than 3MB!");
                 }

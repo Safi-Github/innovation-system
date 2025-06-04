@@ -127,6 +127,7 @@ public class CommitteeService {
         committee.setIsClosed(isClosed);
         return committeeRepository.save(committee);
     }
+
     public List<Committee> getAllCommittees() {
         return committeeRepository.findAll();
     }

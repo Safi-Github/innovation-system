@@ -79,8 +79,9 @@ public class Innovation {
 
     @ManyToOne
     @JoinColumn(name = "committee_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @JsonBackReference
     private Committee committee;
-
 
     // Audit fields
     @CreatedBy
