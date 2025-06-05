@@ -245,8 +245,6 @@ public class InnovationController {
 
         dto.setInvolvedPersons(involvedPersonDTOs);
 
-
-
         if (innovation.getCategory() != null) {
             Category catDto = new Category();
             catDto.setId(innovation.getCategory().getId());
@@ -282,7 +280,6 @@ public class InnovationController {
         return dto;
     }
 
-
     private AdminUserDTO mapUserToAdminDTO(MyUser user) {
         if (user == null) return null;
 
@@ -302,12 +299,6 @@ public class InnovationController {
         // isHead is set externally (from CommitteeMember)
         return dto;
     }
-
-
-
-
-
-
 
     @GetMapping("/{id}")
     public ResponseEntity<Innovation> getInnovationById(@PathVariable Long id) {

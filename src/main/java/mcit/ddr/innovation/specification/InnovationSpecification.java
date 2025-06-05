@@ -70,9 +70,11 @@ public class InnovationSpecification {
 
             
             // 🟢 Filter by Committee
-            if (criteria.getCommittee() != null) {
-                predicates.add(cb.equal(root.get("committee"), criteria.getCommittee()));
+            if (criteria.getCommitteeId() != null) {
+                Predicate committeePredicate = cb.equal(root.get("committee").get("id"), criteria.getCommitteeId());
+                predicates.add(committeePredicate);
             }
+
             // 🟢 Filter by Created By
             if (criteria.getCreatedBy() != null) {
                 predicates.add(cb.equal(root.get("createdBy"), criteria.getCreatedBy()));

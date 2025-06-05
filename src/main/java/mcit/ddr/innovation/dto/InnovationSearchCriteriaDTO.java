@@ -26,5 +26,6 @@ public class InnovationSearchCriteriaDTO {
     // Replacing heavy object with minimal info
     private String assigner;
     private String createdBy;
-    private String committee;
+    private Long committeeId;
+
 }
