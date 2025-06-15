@@ -49,6 +49,10 @@ public class Committee {
     public void setIsClosed(boolean isClosed) {
         this.isClosed=isClosed;
     }
+    @JsonProperty("isClosed")
+    public boolean getIsClosed() {
+        return isClosed;
+    }
     public void setDescription(String description) {
         this.description = description;
     }

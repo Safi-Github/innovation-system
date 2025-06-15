@@ -19,7 +19,7 @@ public class InnovationResponseDTO {
     private String resourcesNeeded;
     private Boolean isAssigned;
     private Date assignedDate;
-
+    private String attachment;
     private Date createdDate;
 
     private Category category;

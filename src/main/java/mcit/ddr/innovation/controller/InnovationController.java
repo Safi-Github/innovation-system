@@ -228,6 +228,7 @@ public class InnovationController {
         dto.setResourcesNeeded(innovation.getResourcesNeeded());
         dto.setIsAssigned(innovation.getIsAssigned());
         dto.setAssignedDate(innovation.getAssignedDate());
+        dto.setAttachment(innovation.getAttachment());
         dto.setCreatedDate(innovation.getCreateDate());
         List<InvolvedPersonDTO> involvedPersonDTOs = innovation.getInvolvedPersons().stream().map(person -> {
             InvolvedPersonDTO dto1 = new InvolvedPersonDTO();

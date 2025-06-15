@@ -33,9 +33,14 @@ public class InnovationSpecification {
         return (Root<Innovation> root, CriteriaQuery<?> query, CriteriaBuilder cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
+            // 🟢 Filter by title
+            if (criteria.getTitle() != null) {
+                predicates.add(cb.equal(root.get("title"), criteria.getTitle()));
+            }
+
             // 🟢 Filter by Category
-            if (criteria.getCategory() != null) {
-                predicates.add(cb.equal(root.get("category"), criteria.getCategory()));
+            if (criteria.getCategoryId() != null) {
+                predicates.add(cb.equal(root.get("category").get("id"), criteria.getCategoryId()));
             }
 
             // 🟢 Filter by Status
