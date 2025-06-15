@@ -19,7 +19,7 @@ public interface MyUserRepository extends JpaRepository<MyUser, Long> {
 
     boolean existsByEmail(String email);
 
-    Optional<MyUser> findByEmailVerificationToken(String token);
+//    Optional<MyUser> findByEmailVerificationToken(String token);
 
     Optional<MyUser> findByEmail(String email);
 
@@ -29,10 +29,6 @@ public interface MyUserRepository extends JpaRepository<MyUser, Long> {
     long countByIsActiveTrue();
     long countByIsActiveFalse();
     long count(); // No need to write @Query
-
-
-
-//  Optional<MyUser> findByEmailVerificationToken(String token);
 
 
 

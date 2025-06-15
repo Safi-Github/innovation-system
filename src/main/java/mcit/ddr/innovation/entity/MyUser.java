@@ -82,10 +82,10 @@ public class MyUser {
     @Column(name = "profile_image")
     private String profileImage;
 
-    @Column(columnDefinition = "boolean default false")
-    private Boolean isEmailVerified = false;
+//    @Column(columnDefinition = "boolean default false")
+//    private Boolean isEmailVerified = false;
 
-    private String emailVerificationToken;
+//    private String emailVerificationToken;
 
     public String getLastname() {
         return lastname;

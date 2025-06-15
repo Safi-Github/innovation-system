@@ -63,17 +63,17 @@ public class AccountController {
     public ResponseEntity<?> createUser(@RequestPart("user") MyUser user,
                                         @RequestPart(value = "image", required = false) MultipartFile imageFile) {
 
-        String token = UUID.randomUUID().toString();
-        user.setEmailVerificationToken(token);
-        user.setIsEmailVerified(false);
+//        String token = UUID.randomUUID().toString();
+//        user.setEmailVerificationToken(token);
+//        user.setIsEmailVerified(false);
 
-        // Send verification email
-        String verificationUrl = "http://localhost:3000/api/verify-email?token=" + token;
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(user.getEmail());
-        message.setSubject("Email Verification - Innovation Management System");
-        message.setText("Please verify your email by clicking the link: " + verificationUrl);
-        mailSender.send(message);
+//        // Send verification email
+//        String verificationUrl = "http://localhost:8080/api/verify-email?token=" + token;
+//        SimpleMailMessage message = new SimpleMailMessage();
+//        message.setTo(user.getEmail());
+//        message.setSubject("Email Verification - Innovation Management System");
+//        message.setText("Please verify your email by clicking the link: " + verificationUrl);
+//        mailSender.send(message);
 
 
         // Check for existing username
@@ -111,21 +111,21 @@ public class AccountController {
         return ResponseEntity.ok(savedUser);
     }
 
-    @GetMapping("/verify-email")
-    public ResponseEntity<?> verifyEmail(@RequestParam String token) {
-        Optional<MyUser> userOpt = myUserRepository.findByEmailVerificationToken(token);
-
-        if (userOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body("Invalid verification token.");
-        }
-
-        MyUser user = userOpt.get();
-        user.setIsEmailVerified(true);
-        user.setEmailVerificationToken(null); // Clear token after successful verification
-        myUserRepository.save(user);
-
-        return ResponseEntity.ok("Email verified successfully. You can now log in.");
-    }
+//    @GetMapping("/verify-email")
+//    public ResponseEntity<?> verifyEmail(@RequestParam String token) {
+//        Optional<MyUser> userOpt = myUserRepository.findByEmailVerificationToken(token);
+//
+//        if (userOpt.isEmpty()) {
+//            return ResponseEntity.badRequest().body("Invalid verification token.");
+//        }
+//
+//        MyUser user = userOpt.get();
+//        user.setIsEmailVerified(true);
+//        user.setEmailVerificationToken(null); // Clear token after successful verification
+//        myUserRepository.save(user);
+//
+//        return ResponseEntity.ok("Email verified successfully. You can now log in.");
+//    }
 
 
 

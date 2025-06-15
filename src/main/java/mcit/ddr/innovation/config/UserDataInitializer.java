@@ -36,7 +36,7 @@ public class UserDataInitializer {
             user.setPassword(passwordEncoder.encode(rawPassword));
             user.setRole(role);
             user.setIsActive(true);
-            user.setIsEmailVerified(true);
+//            user.setIsEmailVerified(true);
             userRepository.save(user);
             System.out.println("✅ Default " + role.name() + " user created: " + username);
         }
