@@ -87,7 +87,11 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000")); // make sure frontend runs here
+        configuration.setAllowedOrigins(List.of(
+                "http://localhost:3000",        // for local development
+                "http://10.10.255.63:3000",     // for production IP
+                "https://ictinnovation.gov.af:3000"  // optional: your domain if using HTTPS
+        ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
@@ -96,4 +100,5 @@ public class SecurityConfiguration {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
 }

@@ -40,4 +40,8 @@ public interface InnovationRepository extends JpaRepository<Innovation, Long>, J
         String getCategoryName();
         Long getInnovationCount();
     }
+
+
+    long countByCommitteeIdIn(List<Long> committeeIds);
+
 }

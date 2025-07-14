@@ -381,4 +381,22 @@ public class InnovationService {
     public long countInnovationByCommittee(Long committeeId) {
         return innovationRepository.countByCommitteeId(committeeId);
     }
+
+    public long countInnovationsAssignedToUserCommittees() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+        MyUser currentUser = myUserRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found: " + email));
+
+        List<Long> committeeIds = committeeMemberRepository.findCommitteeIdsByUserId(currentUser.getId());
+
+        if (committeeIds.isEmpty()) {
+            return 0;
+        }
+
+        return innovationRepository.countByCommitteeIdIn(committeeIds);
+    }
+
+
+
 }

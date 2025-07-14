@@ -373,6 +373,12 @@ public class InnovationController {
         return ResponseEntity.ok(counts);
     }
 
+    @GetMapping("/committee-innovation-count")
+    public ResponseEntity<Long> getAssignedInnovationCountForUser() {
+        long count = innovationService.countInnovationsAssignedToUserCommittees();
+        return ResponseEntity.ok(count);
+    }
+
 
     @GetMapping("/innovationPerCategory")
     public ResponseEntity<List<Map<String, Object>>> getInnovationCountPerCategory() {

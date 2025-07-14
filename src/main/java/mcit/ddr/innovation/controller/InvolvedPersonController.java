@@ -1,12 +1,8 @@
 package mcit.ddr.innovation.controller;
 
 import lombok.RequiredArgsConstructor;
-import mcit.ddr.innovation.dto.InnovationSearchCriteriaDTO;
-import mcit.ddr.innovation.entity.Innovation;
 import mcit.ddr.innovation.entity.InvolvedPerson;
 import mcit.ddr.innovation.service.InvolvedPersonService;
-
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

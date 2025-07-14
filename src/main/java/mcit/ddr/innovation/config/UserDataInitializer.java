@@ -4,6 +4,7 @@ import jakarta.annotation.PostConstruct;
 import mcit.ddr.innovation.entity.MyUser;
 import mcit.ddr.innovation.enums.Role;
 import mcit.ddr.innovation.repository.MyUserRepository;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +16,7 @@ public class UserDataInitializer {
     private final MyUserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserDataInitializer(MyUserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserDataInitializer(MyUserRepository userRepository, @Lazy PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
