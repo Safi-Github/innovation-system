@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import mcit.ddr.innovation.dto.*;
 import mcit.ddr.innovation.entity.*;
+import mcit.ddr.innovation.enums.InnovStatus;
 import mcit.ddr.innovation.repository.InnovationRepository;
 import mcit.ddr.innovation.repository.ReviewRepository;
 import mcit.ddr.innovation.repository.MyUserRepository;
@@ -277,7 +278,6 @@ public class InnovationController {
             committeeDto.setMembers(memberDTOs);
             dto.setAssignedTo(committeeDto);
         }
-
         return dto;
     }
 
@@ -366,19 +366,11 @@ public class InnovationController {
         return ResponseEntity.ok(count);
     }
 
-
     @GetMapping("/count-by-status")
     public ResponseEntity<Map<String, Long>> countInnovationsByStatus() {
         Map<String, Long> counts = innovationService.countInnovationsByStatus();
         return ResponseEntity.ok(counts);
     }
-
-    @GetMapping("/committee-innovation-count")
-    public ResponseEntity<Long> getAssignedInnovationCountForUser() {
-        long count = innovationService.countInnovationsAssignedToUserCommittees();
-        return ResponseEntity.ok(count);
-    }
-
 
     @GetMapping("/innovationPerCategory")
     public ResponseEntity<List<Map<String, Object>>> getInnovationCountPerCategory() {
@@ -393,4 +385,11 @@ public class InnovationController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/board-status-count")
+    public ResponseEntity<Map<InnovStatus, Long>> getInnovationCountsByStatus() {
+        Map<InnovStatus, Long> result = innovationService.countInnovationsByStatusForBoardMember();
+        return ResponseEntity.ok(result);
+    }
+
 }

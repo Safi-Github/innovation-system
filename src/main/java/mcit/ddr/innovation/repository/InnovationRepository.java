@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import mcit.ddr.innovation.entity.Innovation;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -43,5 +44,9 @@ public interface InnovationRepository extends JpaRepository<Innovation, Long>, J
 
 
     long countByCommitteeIdIn(List<Long> committeeIds);
+
+    @Query("SELECT i.status, COUNT(i) FROM Innovation i " +
+            "WHERE i.committee.id IN :committeeIds GROUP BY i.status")
+    List<Object[]> countByStatusInCommittees(@Param("committeeIds") List<Long> committeeIds);
 
 }

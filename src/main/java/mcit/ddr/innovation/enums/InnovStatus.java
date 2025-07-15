@@ -7,6 +7,7 @@ public enum InnovStatus {
     REJECTED,
     RESUBMITTED,
     ASSIGNED,
-    APPROVED
+    APPROVED,
+    PENDING
 
 }

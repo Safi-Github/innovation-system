@@ -352,19 +352,14 @@ public class InnovationService {
         }
     }
 
-
-
-
     public Map<String, Long> countInnovationsByStatus() {
         Map<String, Long> result = new HashMap<>();
-
         for (InnovStatus status : InnovStatus.values()) {
             if (status != InnovStatus.DRAFT) {
                 long count = innovationRepository.countByStatus(status);
                 result.put(status.name(), count);
             }
         }
-
         return result;
     }
 
@@ -372,31 +367,40 @@ public class InnovationService {
         return innovationRepository.countInnovationsPerCategory();
     }
 
-
     //count innovation assigned per committee
     public List<InnovationRepository.CommitteeInnovationCount> getInnovationCountPerCommittee() {
         return innovationRepository.countInnovationsPerCommittee();
     }
+
     //count innovation assigned for specific committee
     public long countInnovationByCommittee(Long committeeId) {
         return innovationRepository.countByCommitteeId(committeeId);
     }
 
-    public long countInnovationsAssignedToUserCommittees() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
-        MyUser currentUser = myUserRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found: " + email));
+    // count innovation status by committees where the logged-in user is a part of
+    public Map<InnovStatus, Long> countInnovationsByStatusForBoardMember() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        MyUser user = myUserRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        List<Long> committeeIds = committeeMemberRepository.findCommitteeIdsByUserId(currentUser.getId());
+        List<Long> committeeIds = committeeMemberRepository.findCommitteeIdsByUserId(user.getId());
 
-        if (committeeIds.isEmpty()) {
-            return 0;
+        // Initialize all statuses with count 0
+        Map<InnovStatus, Long> counts = new EnumMap<>(InnovStatus.class);
+        for (InnovStatus status : InnovStatus.values()) {
+            counts.put(status, 0L);
         }
 
-        return innovationRepository.countByCommitteeIdIn(committeeIds);
+        if (!committeeIds.isEmpty()) {
+            List<Object[]> result = innovationRepository.countByStatusInCommittees(committeeIds);
+            for (Object[] row : result) {
+                InnovStatus status = (InnovStatus) row[0];
+                Long count = (Long) row[1];
+                counts.put(status, count);
+            }
+        }
+
+        return counts;
     }
-
-
 
 }
