@@ -2,6 +2,7 @@ package mcit.ddr.innovation.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+import mcit.ddr.innovation.entity.Category;
 
 @Data
 public class PartialInnovationUpdateDTO {
@@ -13,7 +14,7 @@ public class PartialInnovationUpdateDTO {
 
     private String purpose;
 
-    private String category;
+    private Category category;
 
     private String additionalInfo;
 

@@ -91,9 +91,9 @@ public class InnovationService {
         if (partialUpdateDTO.getPurpose() != null) {
             innovation.setPurpose(partialUpdateDTO.getPurpose());
         }
-//        if (partialUpdateDTO.getCategory() != null) {
-//            innovation.setCategory(partialUpdateDTO.getCategory());
-//        }
+        if (partialUpdateDTO.getCategory() != null) {
+            innovation.setCategory(partialUpdateDTO.getCategory());
+        }
         if (partialUpdateDTO.getAdditionalInfo() != null) {
             innovation.setAdditionalInfo(partialUpdateDTO.getAdditionalInfo());
         }
