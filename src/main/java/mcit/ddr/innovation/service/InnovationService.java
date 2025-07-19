@@ -377,28 +377,36 @@ public class InnovationService {
         return innovationRepository.countByCommitteeId(committeeId);
     }
 
-    // count innovation status by committees where the logged-in user is a part of
-    public Map<InnovStatus, Long> countInnovationsByStatusForBoardMember() {
+    public Map<String, Long> countInnovationsByStatusForCommitteeMember() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         MyUser user = myUserRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         List<Long> committeeIds = committeeMemberRepository.findCommitteeIdsByUserId(user.getId());
 
-        // Initialize all statuses with count 0
-        Map<InnovStatus, Long> counts = new EnumMap<>(InnovStatus.class);
+        // Use String keys for JSON-friendly response
+        Map<String, Long> counts = new LinkedHashMap<>();
+
+        // Initialize status counts with 0
         for (InnovStatus status : InnovStatus.values()) {
-            counts.put(status, 0L);
+            counts.put(status.name(), 0L);
         }
+
+        long totalAssigned = 0;
 
         if (!committeeIds.isEmpty()) {
             List<Object[]> result = innovationRepository.countByStatusInCommittees(committeeIds);
+
             for (Object[] row : result) {
                 InnovStatus status = (InnovStatus) row[0];
                 Long count = (Long) row[1];
-                counts.put(status, count);
+                counts.put(status.name(), count);
+                totalAssigned += count;
             }
         }
+
+        // Put total assigned at the top
+        counts.put("TotalAssigned", totalAssigned);
 
         return counts;
     }

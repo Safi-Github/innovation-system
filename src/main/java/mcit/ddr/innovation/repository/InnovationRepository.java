@@ -45,8 +45,8 @@ public interface InnovationRepository extends JpaRepository<Innovation, Long>, J
 
     long countByCommitteeIdIn(List<Long> committeeIds);
 
-    @Query("SELECT i.status, COUNT(i) FROM Innovation i " +
-            "WHERE i.committee.id IN :committeeIds GROUP BY i.status")
+    @Query("SELECT i.status, COUNT(i) FROM Innovation i WHERE i.committee.id IN :committeeIds GROUP BY i.status")
     List<Object[]> countByStatusInCommittees(@Param("committeeIds") List<Long> committeeIds);
+
 
 }

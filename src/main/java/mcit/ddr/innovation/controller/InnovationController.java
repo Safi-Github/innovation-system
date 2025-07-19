@@ -387,9 +387,9 @@ public class InnovationController {
     }
 
     @GetMapping("/board-status-count")
-    public ResponseEntity<Map<InnovStatus, Long>> getInnovationCountsByStatus() {
-        Map<InnovStatus, Long> result = innovationService.countInnovationsByStatusForBoardMember();
-        return ResponseEntity.ok(result);
+    public ResponseEntity<Map<String, Long>> getInnovationStatusCountForCommitteeMember() {
+        Map<String, Long> counts = innovationService.countInnovationsByStatusForCommitteeMember();
+        return ResponseEntity.ok(counts);
     }
 
 }
