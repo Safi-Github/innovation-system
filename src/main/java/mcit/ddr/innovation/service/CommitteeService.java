@@ -1,5 +1,6 @@
 package mcit.ddr.innovation.service;
 
+import mcit.ddr.innovation.enums.InnovStatus;
 import mcit.ddr.innovation.service.CommitteeFileStorageService;
 import mcit.ddr.innovation.dto.CommitteeDTO;
 import mcit.ddr.innovation.entity.Committee;
@@ -15,7 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class CommitteeService {
@@ -142,4 +145,21 @@ public class CommitteeService {
                 .orElseThrow(() -> new RuntimeException("Committee not found"));
         return committee.getInnovations();
     }
+
+    public Map<InnovStatus, Long> countInnovationStatusesByCommittee(Long committeeId) {
+        Committee committee = committeeRepository.findById(committeeId)
+                .orElseThrow(() -> new RuntimeException("Committee not found"));
+
+        List<Innovation> innovations = committee.getInnovations();
+
+        Map<InnovStatus, Long> statusCounts = new EnumMap<>(InnovStatus.class);
+
+        for (Innovation innovation : innovations) {
+            InnovStatus status = innovation.getStatus();
+            statusCounts.put(status, statusCounts.getOrDefault(status, 0L) + 1);
+        }
+
+        return statusCounts;
+    }
+
 }

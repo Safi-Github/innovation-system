@@ -2,6 +2,7 @@ package mcit.ddr.innovation.controller;
 
 import mcit.ddr.innovation.dto.CommitteeDTO;
 import mcit.ddr.innovation.entity.Committee;
+import mcit.ddr.innovation.enums.InnovStatus;
 import mcit.ddr.innovation.exception.FileValidationException;
 import mcit.ddr.innovation.service.CommitteeFileDownloadService;
 import mcit.ddr.innovation.service.CommitteeService;
@@ -19,6 +20,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/committee")
@@ -161,6 +163,14 @@ public class CommitteeController {
             .contentType(MediaType.parseMediaType(contentType))
             .body(file);
     }
+
+
+    // api for how many innovation assigned, resubmitted ... in one committee
+    @GetMapping("/{id}/innovation-status-counts")
+    public ResponseEntity<Map<InnovStatus, Long>> getInnovationStatusCounts(@PathVariable Long id) {
+        return ResponseEntity.ok(committeeService.countInnovationStatusesByCommittee(id));
+    }
+
 
 
 
