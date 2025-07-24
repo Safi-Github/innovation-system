@@ -23,23 +23,22 @@ public class UserDataInitializer {
 
     @PostConstruct
     public void init() {
-        createDefaultUser("innovator", "123", Role.ROLE_INNOVATOR);
-        createDefaultUser("admin", "123", Role.ROLE_ADMIN);
-        createDefaultUser("boardmember", "123", Role.ROLE_BOARD_MEMBER);
+        createDefaultUser("innovator", "123", Role.ROLE_INNOVATOR, "Innovator", "Innovator");
+        createDefaultUser("admin", "123", Role.ROLE_ADMIN, "Admin", "Admin");
+        createDefaultUser("boardmember", "123", Role.ROLE_BOARD_MEMBER, "Board", "Member");
     }
 
-    private void createDefaultUser(String username, String rawPassword, Role role) {
-        Optional<MyUser> existing = userRepository.findByUsername(username);
-        if (existing.isEmpty()) {
+
+    private void createDefaultUser(String username, String password, Role role, String firstName, String lastName) {
+        if (!userRepository.existsByUsername(username)) {
             MyUser user = new MyUser();
-            user.setEmail(username + "@example.com");
             user.setUsername(username);
-            user.setPassword(passwordEncoder.encode(rawPassword));
+            user.setPassword(passwordEncoder.encode(password));
             user.setRole(role);
-            user.setIsActive(true);
-//            user.setIsEmailVerified(true);
+            user.setFirstname(firstName);
+            user.setLastname(lastName);
             userRepository.save(user);
-            System.out.println("✅ Default " + role.name() + " user created: " + username);
         }
     }
+
 }
