@@ -213,36 +213,45 @@ public class AccountController {
     @PostMapping("/authenticate")
     public ResponseEntity<?> authenticateAndGetToken(@RequestBody LoginForm loginForm) {
         try {
-            // Authenticate using email and password
+            // Authenticate with username or email + password
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            loginForm.email(), loginForm.password()
+                            loginForm.identifier(), loginForm.password()
                     )
             );
 
-            MyUser user = myUserRepository.findByEmail(loginForm.email())
-                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+            // Fetch user by username or email for active check
+            Optional<MyUser> optionalUser = myUserRepository.findByUsername(loginForm.identifier());
+            if (optionalUser.isEmpty()) {
+                optionalUser = myUserRepository.findByEmail(loginForm.identifier());
+            }
 
-            // Check if user is active
+            if (optionalUser.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+            }
+
+            MyUser user = optionalUser.get();
+
             if (!user.getIsActive()) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Inactive user. Please contact admin.");
             }
 
-            // Check if authenticated successfully
             if (authentication.isAuthenticated()) {
-                UserDetails userDetails = myUserDetailService.loadUserByUsername(loginForm.email());
+                UserDetails userDetails = myUserDetailService.loadUserByUsername(loginForm.identifier());
                 String token = jwtUtilityClass.generateToken(userDetails);
                 return ResponseEntity.ok(token);
             }
 
         } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username/email or password");
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Authentication error");
         }
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
     }
+
 
 
     @GetMapping("/account")

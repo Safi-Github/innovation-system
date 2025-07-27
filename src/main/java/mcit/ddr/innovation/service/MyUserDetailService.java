@@ -14,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -29,16 +30,28 @@ public class MyUserDetailService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        MyUser user = repository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+    public UserDetails loadUserByUsername(String identifier) throws UsernameNotFoundException {
+        log.info("[AUTH] Trying login with username/email: {}", identifier);
 
-        return User.builder()
-                .username(user.getEmail())  // ✅ email used here
-                .password(user.getPassword())
-                .authorities(Collections.singletonList(new SimpleGrantedAuthority(user.getRole().name())))
-                .build();
+        Optional<MyUser> optionalUser = repository.findByUsername(identifier);
+        if (optionalUser.isEmpty()) {
+            log.info("[AUTH] Not found by username. Trying email: {}", identifier);
+            optionalUser = repository.findByEmail(identifier);
+        }
+
+        MyUser user = optionalUser.orElseThrow(() ->
+                new UsernameNotFoundException("User not found with username or email: " + identifier));
+
+        log.info("[AUTH] Found user: username='{}', email='{}', role='{}'",
+                user.getUsername(), user.getEmail(), user.getRole());
+
+        return new User(
+                identifier,  // return the identifier used for login to keep consistent principal
+                user.getPassword(),
+                Collections.singleton(new SimpleGrantedAuthority(user.getRole().name()))
+        );
     }
+
 
 
     public void changePassword(String email, ChangePasswordRequest request) {
