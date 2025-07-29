@@ -124,7 +124,7 @@ public class ForgotPasswordService {
             MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            helper.setFrom("safi.address@gmail.com");
+            helper.setFrom("idreesdaudzai2000@gmail.com");
             helper.setTo(recipientEmail);
             helper.setSubject("Password Reset OTP");
 
@@ -138,7 +138,7 @@ public class ForgotPasswordService {
             javaMailSender.send(message);
 
         } catch (MessagingException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Failed to send email: " + e.getMessage(), e);
         }
     }
 
@@ -155,9 +155,4 @@ public class ForgotPasswordService {
     private String validateResetToken(String token) {
         return jwtUtilityClass.validateResetToken(token);
     }
-
-
-
-
-
 }

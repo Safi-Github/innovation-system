@@ -54,9 +54,12 @@ public class MyUserDetailService implements UserDetailsService {
 
 
 
-    public void changePassword(String email, ChangePasswordRequest request) {
-        MyUser user = repository.findByEmail(email)  // ✅ change to findByEmail
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+    public void changePassword(String identifier, ChangePasswordRequest request) {
+        Optional<MyUser> userOpt = repository.findByUsername(identifier);
+        if (userOpt.isEmpty()) {
+            userOpt = repository.findByEmail(identifier);
+        }
+        MyUser user = userOpt.orElseThrow(() -> new UsernameNotFoundException("User not found with identifier: " + identifier));
 
         if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
             throw new IllegalArgumentException("Current password is incorrect");
@@ -69,4 +72,5 @@ public class MyUserDetailService implements UserDetailsService {
         user.setPassword(passwordEncoder.encode(request.newPassword()));
         repository.save(user);
     }
+
 }

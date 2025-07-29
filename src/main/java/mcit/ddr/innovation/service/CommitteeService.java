@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -146,20 +147,28 @@ public class CommitteeService {
         return committee.getInnovations();
     }
 
-    public Map<InnovStatus, Long> countInnovationStatusesByCommittee(Long committeeId) {
-        Committee committee = committeeRepository.findById(committeeId)
-                .orElseThrow(() -> new RuntimeException("Committee not found"));
+    public Map<String, Map<InnovStatus, Long>> countStatusesByCommitteeName() {
+        List<Committee> allCommittees = committeeRepository.findAll();
+        Map<String, Map<InnovStatus, Long>> committeeStatusCounts = new LinkedHashMap<>();
 
-        List<Innovation> innovations = committee.getInnovations();
+        for (Committee committee : allCommittees) {
+            Map<InnovStatus, Long> statusCounts = new EnumMap<>(InnovStatus.class);
 
-        Map<InnovStatus, Long> statusCounts = new EnumMap<>(InnovStatus.class);
+            // Initialize all statuses with 0
+            for (InnovStatus status : InnovStatus.values()) {
+                statusCounts.put(status, 0L);
+            }
 
-        for (Innovation innovation : innovations) {
-            InnovStatus status = innovation.getStatus();
-            statusCounts.put(status, statusCounts.getOrDefault(status, 0L) + 1);
+            for (Innovation innovation : committee.getInnovations()) {
+                InnovStatus status = innovation.getStatus();
+                statusCounts.put(status, statusCounts.get(status) + 1);
+            }
+
+            // Use committee name instead of ID as key
+            committeeStatusCounts.put(committee.getName(), statusCounts);
         }
 
-        return statusCounts;
+        return committeeStatusCounts;
     }
 
 }

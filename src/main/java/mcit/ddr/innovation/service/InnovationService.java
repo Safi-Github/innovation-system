@@ -378,16 +378,19 @@ public class InnovationService {
     }
 
     public Map<String, Long> countInnovationsByStatusForCommitteeMember() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        MyUser user = myUserRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        String identifier = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        Optional<MyUser> userOpt = myUserRepository.findByUsername(identifier);
+        if (userOpt.isEmpty()) {
+            userOpt = myUserRepository.findByEmail(identifier);
+        }
+
+        MyUser user = userOpt.orElseThrow(() -> new RuntimeException("User not found"));
 
         List<Long> committeeIds = committeeMemberRepository.findCommitteeIdsByUserId(user.getId());
 
-        // Use String keys for JSON-friendly response
         Map<String, Long> counts = new LinkedHashMap<>();
 
-        // Initialize status counts with 0
         for (InnovStatus status : InnovStatus.values()) {
             counts.put(status.name(), 0L);
         }
@@ -405,10 +408,10 @@ public class InnovationService {
             }
         }
 
-        // Put total assigned at the top
         counts.put("TotalAssigned", totalAssigned);
 
         return counts;
     }
+
 
 }

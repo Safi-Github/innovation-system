@@ -165,11 +165,11 @@ public class CommitteeController {
     }
 
 
-    // api for how many innovation assigned, resubmitted ... in one committee
-    @GetMapping("/{id}/innovation-status-counts")
-    public ResponseEntity<Map<InnovStatus, Long>> getInnovationStatusCounts(@PathVariable Long id) {
-        return ResponseEntity.ok(committeeService.countInnovationStatusesByCommittee(id));
+    @GetMapping("/each-committee-status-counts")
+    public ResponseEntity<Map<String, Map<InnovStatus, Long>>> getCommitteeStatusCountsByName() {
+        return ResponseEntity.ok(committeeService.countStatusesByCommitteeName());
     }
+
 
 
 
