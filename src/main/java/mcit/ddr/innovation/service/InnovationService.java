@@ -62,9 +62,14 @@ public class InnovationService {
 
     public Innovation createInnovation(Innovation innovation, MultipartFile attachmentFile) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
-        MyUser currentUser = myUserRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found: " + email));
+        String identifier = auth.getName(); // could be email or username
+
+        // Try to find user by username, then email
+        Optional<MyUser> userOpt = myUserRepository.findByUsername(identifier);
+        if (userOpt.isEmpty()) {
+            userOpt = myUserRepository.findByEmail(identifier);
+        }
+        MyUser currentUser = userOpt.orElseThrow(() -> new RuntimeException("User not found: " + identifier));
 
         innovation.setCreateDate(new Date());
         innovation.setIsAssigned(false);
@@ -75,6 +80,7 @@ public class InnovationService {
             String filePath = fileStorageService.saveFile(attachmentFile);
             innovation.setAttachment(filePath);
         }
+
         return innovationRepository.save(innovation);
     }
 
