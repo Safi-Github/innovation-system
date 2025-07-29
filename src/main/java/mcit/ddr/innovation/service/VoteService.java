@@ -33,15 +33,18 @@ public class VoteService {
         this.committeeMemberRepository=committeeMemberRepository;
     }
 
-    public ResponseEntity<?> vote(Long innovationId, VoteDecision decesion) {
-
+    public ResponseEntity<?> vote(Long innovationId, VoteDecision decision) {
         Innovation innovation = innovationRepository.findById(innovationId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Innovation not found"));
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
-        MyUser loggedInUser = myUserRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found: " + email));
+        String identifier = auth.getName(); // username or email
+
+        Optional<MyUser> userOpt = myUserRepository.findByUsername(identifier);
+        if (userOpt.isEmpty()) {
+            userOpt = myUserRepository.findByEmail(identifier);
+        }
+        MyUser loggedInUser = userOpt.orElseThrow(() -> new RuntimeException("User not found: " + identifier));
 
         CommitteeMember member = committeeMemberRepository
                 .findByCommitteeIdAndUserId(innovation.getCommittee().getId(), loggedInUser.getId())
@@ -56,7 +59,7 @@ public class VoteService {
                 return ResponseEntity.badRequest().body("Vote already approved. Cannot change or comment.");
             }
 
-            if (existingVote.getDecision() == VoteDecision.REJECTED && decesion == VoteDecision.APPROVED) {
+            if (existingVote.getDecision() == VoteDecision.REJECTED && decision == VoteDecision.APPROVED) {
                 existingVote.setDecision(VoteDecision.APPROVED);
                 existingVote.setVotedAt(LocalDate.now());
                 voteRepository.save(existingVote);
@@ -70,19 +73,23 @@ public class VoteService {
         Vote newVote = new Vote();
         newVote.setInnovation(innovation);
         newVote.setUser(loggedInUser);
-        newVote.setDecision(decesion);
+        newVote.setDecision(decision);
         newVote.setVotedAt(LocalDate.now());
 
         voteRepository.save(newVote);
         return ResponseEntity.ok("Vote submitted.");
     }
 
+
     public ResponseEntity<?> getVoteForLoggedInUser(Long innovationId) {
-        // Get current authenticated user
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
-        MyUser user = myUserRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found: " + email));
+        String identifier = auth.getName(); // username or email
+
+        Optional<MyUser> userOpt = myUserRepository.findByUsername(identifier);
+        if (userOpt.isEmpty()) {
+            userOpt = myUserRepository.findByEmail(identifier);
+        }
+        MyUser user = userOpt.orElseThrow(() -> new RuntimeException("User not found: " + identifier));
 
         Optional<Vote> voteOpt = voteRepository.findByUserIdAndInnovationId(user.getId(), innovationId);
 
@@ -94,6 +101,7 @@ public class VoteService {
             return ResponseEntity.status(404).body("Vote not found for this innovation and user.");
         }
     }
+
 
     public ResponseEntity<?> getVotesByInnovationId(Long innovationId) {
         List<Vote> votes = voteRepository.findByInnovationId(innovationId);

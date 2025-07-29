@@ -18,6 +18,7 @@ import org.w3c.dom.Text;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CommentService {
@@ -40,15 +41,19 @@ public class CommentService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Innovation not found"));
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
-        MyUser loggedInUser = myUserRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Logged In User not found: " + email));
+        String identifier = auth.getName(); // username or email
+
+        Optional<MyUser> userOpt = myUserRepository.findByUsername(identifier);
+        if (userOpt.isEmpty()) {
+            userOpt = myUserRepository.findByEmail(identifier);
+        }
+        MyUser loggedInUser = userOpt.orElseThrow(() -> new RuntimeException("Logged In User not found: " + identifier));
 
         CommitteeMember member = committeeMemberRepository
                 .findByCommitteeIdAndUserId(innovation.getCommittee().getId(), loggedInUser.getId())
                 .orElseThrow(() -> new AccessDeniedException("User is not a committee member"));
 
-        Vote vote = voteRepository.findByUserIdAndInnovationId(loggedInUser.getId(),innovation.getId())
+        Vote vote = voteRepository.findByUserIdAndInnovationId(loggedInUser.getId(), innovation.getId())
                 .orElseThrow(() -> new AccessDeniedException("You have not voted the Innovation yet"));
 
         if (vote.getDecision() == VoteDecision.APPROVED) {
@@ -56,7 +61,6 @@ public class CommentService {
         }
 
         Comment comObj = new Comment();
-
         comObj.setInnovation(innovation);
         comObj.setUser(loggedInUser);
         comObj.setComment(comment);
@@ -66,6 +70,7 @@ public class CommentService {
 
         return ResponseEntity.ok("Comment added.");
     }
+
 
     public ResponseEntity<?> getUserCommentsForInnovation(Long innovationId, Long userId) {
         Innovation innovation = innovationRepository.findById(innovationId)

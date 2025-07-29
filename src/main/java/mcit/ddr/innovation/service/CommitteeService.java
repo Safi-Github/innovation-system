@@ -16,10 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
-import java.util.EnumMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class CommitteeService {
@@ -51,29 +48,31 @@ public class CommitteeService {
     //     return committeeRepository.save(committee);
     // }
 
-        public Committee createCommittee(Committee dto, MultipartFile attachmentFile) {
-        // Add default values and set user information
+    public Committee createCommittee(Committee dto, MultipartFile attachmentFile) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
-        MyUser currentUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found: " + email));
+        String identifier = auth.getName(); // could be username or email
+
+        Optional<MyUser> userOpt = userRepository.findByUsername(identifier);
+        if (userOpt.isEmpty()) {
+            userOpt = userRepository.findByEmail(identifier);
+        }
+        MyUser currentUser = userOpt.orElseThrow(() -> new RuntimeException("User not found: " + identifier));
 
         Committee committee = new Committee();
         committee.setName(dto.getName());
         committee.setDescription(dto.getDescription());
-        committee.setCreatedDate(LocalDate.now());  
+        committee.setCreatedDate(LocalDate.now());
         committee.setCreatedBy(currentUser);
         committee.setIsClosed(false);
 
-        // Handle file upload if a file is provided
         if (attachmentFile != null && !attachmentFile.isEmpty()) {
             String filePath = committeeFileStorageService.saveFile(attachmentFile);
-            committee.setAttachment(filePath);  // Save the file path to the committee entity
+            committee.setAttachment(filePath);
         }
 
-        // Save the committee to the database
         return committeeRepository.save(committee);
     }
+
 
     // public Committee updateCommitteeName(Long id, String newName) {
     //     Committee committee = committeeRepository.findById(id)
