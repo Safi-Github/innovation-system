@@ -166,9 +166,11 @@ public class CommitteeController {
 
 
     @GetMapping("/each-committee-status-counts")
-    public ResponseEntity<Map<String, Map<InnovStatus, Long>>> getCommitteeStatusCountsByName() {
-        return ResponseEntity.ok(committeeService.countStatusesByCommitteeName());
+    public ResponseEntity<Map<String, Map<String, Long>>> getStatusCountByCommittee() {
+        Map<String, Map<String, Long>> result = committeeService.countStatusesByCommitteeName();
+        return ResponseEntity.ok(result);
     }
+
 
 
 

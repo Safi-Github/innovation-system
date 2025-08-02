@@ -2,10 +2,7 @@ package mcit.ddr.innovation.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
-import mcit.ddr.innovation.dto.InnovationAssignmentResponseDTO;
-import mcit.ddr.innovation.dto.InnovationSearchCriteriaDTO;
-import mcit.ddr.innovation.dto.InnovationStatusChangeResponseDTO;
-import mcit.ddr.innovation.dto.PartialInnovationUpdateDTO;
+import mcit.ddr.innovation.dto.*;
 import mcit.ddr.innovation.entity.*;
 import mcit.ddr.innovation.enums.InnovStatus;
 import mcit.ddr.innovation.enums.Role;
@@ -35,6 +32,9 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+
+import java.time.Month;
+import java.time.format.TextStyle;
 import java.util.EnumMap;
 
 import java.time.LocalDate;
@@ -56,6 +56,7 @@ public class InnovationService {
     private final CommitteeRepository committeeRepository;
     private final CommitteeMemberRepository committeeMemberRepository;
     private final VoteRepository voteRepository;
+    private final CategoryRepository categoryRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -397,8 +398,11 @@ public class InnovationService {
 
         Map<String, Long> counts = new LinkedHashMap<>();
 
+        // Initialize only allowed statuses
         for (InnovStatus status : InnovStatus.values()) {
-            counts.put(status.name(), 0L);
+            if (status != InnovStatus.DRAFT && status != InnovStatus.SUBMITTED) {
+                counts.put(status.name(), 0L);
+            }
         }
 
         long totalAssigned = 0;
@@ -409,8 +413,11 @@ public class InnovationService {
             for (Object[] row : result) {
                 InnovStatus status = (InnovStatus) row[0];
                 Long count = (Long) row[1];
-                counts.put(status.name(), count);
-                totalAssigned += count;
+
+                if (status != InnovStatus.DRAFT && status != InnovStatus.SUBMITTED) {
+                    counts.put(status.name(), count);
+                    totalAssigned += count;
+                }
             }
         }
 
@@ -418,6 +425,54 @@ public class InnovationService {
 
         return counts;
     }
+
+
+    // Monthly and yearly repot
+    public MonthlyReportDTO getMonthlyReport(int month, int year) {
+        MonthlyReportDTO report = new MonthlyReportDTO();
+        report.setMonth(Month.of(month).getDisplayName(TextStyle.FULL, Locale.ENGLISH));
+        report.setYear(year);
+
+        // Initialize only the statuses you want to show (without DRAFT)
+        List<String> reportStatuses = List.of("SUBMITTED", "REJECTED", "RESUBMITTED", "ASSIGNED", "APPROVED");
+        for (String status : reportStatuses) {
+            report.getStatusCounts().put(status, 0L);
+        }
+
+        // Fetch actual status counts
+        List<Object[]> statusData = innovationRepository.countByStatus(month, year);
+        for (Object[] row : statusData) {
+            String status = row[0].toString();
+            Long count = (Long) row[1];
+
+            if ("DRAFT".equals(status)) {
+                continue; // Skip DRAFT
+            } else if ("ASSIGNED".equals(status)) {
+                // Rename ASSIGNED to PENDING
+                report.getStatusCounts().put("PENDING", count);
+            } else {
+                report.getStatusCounts().put(status, count);
+            }
+        }
+
+        // Get all categories
+        List<String> allCategories = categoryRepository.findAllCategoryNames(); // existing method
+        for (String category : allCategories) {
+            report.getCategoryCounts().put(category, 0L);
+        }
+
+        // Fill actual category counts
+        List<Object[]> categoryData = innovationRepository.countByCategory(month, year);
+        for (Object[] row : categoryData) {
+            String category = row[0].toString();
+            Long count = (Long) row[1];
+            report.getCategoryCounts().put(category, count);
+        }
+
+        return report;
+    }
+
+
 
 
 }

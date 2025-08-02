@@ -392,4 +392,13 @@ public class InnovationController {
         return ResponseEntity.ok(counts);
     }
 
+
+    @GetMapping("/monthly-report")
+    public ResponseEntity<MonthlyReportDTO> getMonthlyReport(
+            @RequestParam int month,
+            @RequestParam int year) {
+        return ResponseEntity.ok(innovationService.getMonthlyReport(month, year));
+    }
+
+
 }

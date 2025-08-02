@@ -60,6 +60,8 @@ public class Innovation {
     @CreationTimestamp
     private Date createDate;
 
+
+
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastModifiedDate;
 

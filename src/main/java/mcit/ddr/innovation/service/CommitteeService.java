@@ -146,28 +146,40 @@ public class CommitteeService {
         return committee.getInnovations();
     }
 
-    public Map<String, Map<InnovStatus, Long>> countStatusesByCommitteeName() {
+    public Map<String, Map<String, Long>> countStatusesByCommitteeName() {
         List<Committee> allCommittees = committeeRepository.findAll();
-        Map<String, Map<InnovStatus, Long>> committeeStatusCounts = new LinkedHashMap<>();
+        Map<String, Map<String, Long>> committeeStatusCounts = new LinkedHashMap<>();
 
         for (Committee committee : allCommittees) {
-            Map<InnovStatus, Long> statusCounts = new EnumMap<>(InnovStatus.class);
+            Map<String, Long> statusCounts = new LinkedHashMap<>();
 
-            // Initialize all statuses with 0
-            for (InnovStatus status : InnovStatus.values()) {
-                statusCounts.put(status, 0L);
-            }
+            long totalAssigned = 0;
 
             for (Innovation innovation : committee.getInnovations()) {
                 InnovStatus status = innovation.getStatus();
-                statusCounts.put(status, statusCounts.get(status) + 1);
+
+                // Skip unwanted statuses
+                if (status == InnovStatus.DRAFT || status == InnovStatus.SUBMITTED) {
+                    continue;
+                }
+
+                statusCounts.put(status.name(), statusCounts.getOrDefault(status.name(), 0L) + 1);
+                totalAssigned++;
             }
 
-            // Use committee name instead of ID as key
+            // Ensure all other statuses are present with 0 if not already present
+            for (InnovStatus status : InnovStatus.values()) {
+                if (status != InnovStatus.DRAFT && status != InnovStatus.SUBMITTED) {
+                    statusCounts.putIfAbsent(status.name(), 0L);
+                }
+            }
+
+            statusCounts.put("TotalAssigned", totalAssigned);
             committeeStatusCounts.put(committee.getName(), statusCounts);
         }
 
         return committeeStatusCounts;
     }
+
 
 }
