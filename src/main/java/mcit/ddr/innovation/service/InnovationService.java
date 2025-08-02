@@ -427,36 +427,35 @@ public class InnovationService {
     }
 
 
-    // Monthly and yearly repot
-    public MonthlyReportDTO getMonthlyReport(int month, int year) {
+    // Monthly and yearly report for a specific month and year
+    public MonthlyReportDTO getReportByMonthAndYear(int month, int year) {
         MonthlyReportDTO report = new MonthlyReportDTO();
         report.setMonth(Month.of(month).getDisplayName(TextStyle.FULL, Locale.ENGLISH));
         report.setYear(year);
 
-        // Initialize only the statuses you want to show (without DRAFT)
+        // Initialize statuses (without DRAFT)
         List<String> reportStatuses = List.of("SUBMITTED", "REJECTED", "RESUBMITTED", "ASSIGNED", "APPROVED");
         for (String status : reportStatuses) {
             report.getStatusCounts().put(status, 0L);
         }
 
-        // Fetch actual status counts
+        // Fetch actual status counts for that month and year
         List<Object[]> statusData = innovationRepository.countByStatus(month, year);
         for (Object[] row : statusData) {
             String status = row[0].toString();
             Long count = (Long) row[1];
 
             if ("DRAFT".equals(status)) {
-                continue; // Skip DRAFT
+                continue; // skip DRAFT
             } else if ("ASSIGNED".equals(status)) {
-                // Rename ASSIGNED to PENDING
                 report.getStatusCounts().put("PENDING", count);
             } else {
                 report.getStatusCounts().put(status, count);
             }
         }
 
-        // Get all categories
-        List<String> allCategories = categoryRepository.findAllCategoryNames(); // existing method
+        // Initialize categories with 0 count
+        List<String> allCategories = categoryRepository.findAllCategoryNames();
         for (String category : allCategories) {
             report.getCategoryCounts().put(category, 0L);
         }
@@ -472,7 +471,48 @@ public class InnovationService {
         return report;
     }
 
+    // Report for a whole year (all months combined)
+    public MonthlyReportDTO getReportByYear(int year) {
+        MonthlyReportDTO report = new MonthlyReportDTO();
+        report.setYear(year);
+        report.setMonth("ALL");
 
+        // Initialize statuses (without DRAFT)
+        List<String> reportStatuses = List.of("SUBMITTED", "REJECTED", "RESUBMITTED", "ASSIGNED", "APPROVED");
+        for (String status : reportStatuses) {
+            report.getStatusCounts().put(status, 0L);
+        }
 
+        // Fetch status counts for whole year
+        List<Object[]> statusData = innovationRepository.countByStatusYear(year);
+        for (Object[] row : statusData) {
+            String status = row[0].toString();
+            Long count = (Long) row[1];
+
+            if ("DRAFT".equals(status)) {
+                continue; // skip DRAFT
+            } else if ("ASSIGNED".equals(status)) {
+                report.getStatusCounts().put("PENDING", count);
+            } else {
+                report.getStatusCounts().put(status, count);
+            }
+        }
+
+        // Initialize categories with 0 count
+        List<String> allCategories = categoryRepository.findAllCategoryNames();
+        for (String category : allCategories) {
+            report.getCategoryCounts().put(category, 0L);
+        }
+
+        // Fill actual category counts for the year
+        List<Object[]> categoryData = innovationRepository.countByCategoryYear(year);
+        for (Object[] row : categoryData) {
+            String category = row[0].toString();
+            Long count = (Long) row[1];
+            report.getCategoryCounts().put(category, count);
+        }
+
+        return report;
+    }
 
 }

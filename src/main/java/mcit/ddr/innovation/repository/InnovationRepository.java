@@ -1,20 +1,16 @@
 package mcit.ddr.innovation.repository;
+
 import mcit.ddr.innovation.enums.InnovStatus;
+import mcit.ddr.innovation.entity.Innovation;
+
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
-
-import mcit.ddr.innovation.entity.Innovation;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
-
-// public interface InnovationRepository extends JpaRepository<Innovation, Long>{}
 public interface InnovationRepository extends JpaRepository<Innovation, Long>, JpaSpecificationExecutor<Innovation> {
-
 
     @Query("SELECT i.committee.id AS committeeId, i.committee.name AS committeeName, COUNT(i.id) AS innovationCount " +
             "FROM Innovation i " +
@@ -27,11 +23,10 @@ public interface InnovationRepository extends JpaRepository<Innovation, Long>, J
         Long getInnovationCount();
     }
 
-    //count innovation for specific committee
     long countByCommitteeId(Long committeeId);
 
-
     long countByStatus(InnovStatus status);
+
     @Query("SELECT i.category.id AS categoryId, i.category.name AS categoryName, COUNT(i.id) AS innovationCount " +
             "FROM Innovation i " +
             "GROUP BY i.category.id, i.category.name")
@@ -42,17 +37,31 @@ public interface InnovationRepository extends JpaRepository<Innovation, Long>, J
         Long getInnovationCount();
     }
 
-
     long countByCommitteeIdIn(List<Long> committeeIds);
 
     @Query("SELECT i.status, COUNT(i) FROM Innovation i WHERE i.committee.id IN :committeeIds GROUP BY i.status")
     List<Object[]> countByStatusInCommittees(@Param("committeeIds") List<Long> committeeIds);
 
-    @Query("SELECT i.status, COUNT(i) FROM Innovation i WHERE MONTH(i.createDate) = :month AND YEAR(i.createDate) = :year GROUP BY i.status")
-    List<Object[]> countByStatus(@Param("month") int month, @Param("year") int year);
+    @Query("SELECT i.category.name, COUNT(i) FROM Innovation i " +
+            "WHERE YEAR(i.createDate) = :year " +
+            "AND i.status <> mcit.ddr.innovation.enums.InnovStatus.DRAFT " +
+            "GROUP BY i.category.name")
+    List<Object[]> countByCategoryYear(@Param("year") int year);
 
-    @Query("SELECT i.category.name, COUNT(i) FROM Innovation i WHERE MONTH(i.createDate) = :month AND YEAR(i.createDate) = :year GROUP BY i.category.name")
+    @Query("SELECT i.category.name, COUNT(i) FROM Innovation i " +
+            "WHERE MONTH(i.createDate) = :month AND YEAR(i.createDate) = :year " +
+            "AND i.status <> mcit.ddr.innovation.enums.InnovStatus.DRAFT " +
+            "GROUP BY i.category.name")
     List<Object[]> countByCategory(@Param("month") int month, @Param("year") int year);
 
+    @Query("SELECT i.status, COUNT(i) FROM Innovation i " +
+            "WHERE MONTH(i.createDate) = :month AND YEAR(i.createDate) = :year " +
+            "GROUP BY i.status")
+    List<Object[]> countByStatus(@Param("month") int month, @Param("year") int year);
+
+    @Query("SELECT i.status, COUNT(i) FROM Innovation i " +
+            "WHERE YEAR(i.createDate) = :year " +
+            "GROUP BY i.status")
+    List<Object[]> countByStatusYear(@Param("year") int year);
 
 }
