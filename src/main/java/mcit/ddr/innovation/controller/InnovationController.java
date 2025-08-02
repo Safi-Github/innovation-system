@@ -395,17 +395,18 @@ public class InnovationController {
 
     @GetMapping("/monthly-report")
     public ResponseEntity<?> getMonthlyReport(
-            @RequestParam(required = false) Integer month,
-            @RequestParam(required = false) Integer year) {
+            @RequestParam Integer year,                // year is required
+            @RequestParam(required = false) Integer month) {  // month optional
 
-        if (month != null && year != null) {
+        if (month != null) {
+            // Both year and month provided
             return ResponseEntity.ok(innovationService.getReportByMonthAndYear(month, year));
-        } else if (year != null) {
-            return ResponseEntity.ok(innovationService.getReportByYear(year));
         } else {
-            return ResponseEntity.badRequest().body("Month or year parameter required");
+            // Only year provided → full year report
+            return ResponseEntity.ok(innovationService.getReportByYear(year));
         }
     }
+
 
 
 
