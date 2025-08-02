@@ -8,8 +8,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
 @Component
 public class UserDataInitializer {
 
@@ -27,7 +25,6 @@ public class UserDataInitializer {
         createDefaultUser("admin", "123", Role.ROLE_ADMIN, "Admin", "Admin");
         createDefaultUser("boardmember", "123", Role.ROLE_BOARD_MEMBER, "Board", "Member");
     }
-
 
     private void createDefaultUser(String username, String password, Role role, String firstName, String lastName) {
         if (!userRepository.existsByUsername(username)) {

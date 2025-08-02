@@ -406,8 +406,4 @@ public class InnovationController {
             return ResponseEntity.ok(innovationService.getReportByYear(year));
         }
     }
-
-
-
-
 }
