@@ -96,8 +96,8 @@ public class SecurityConfiguration {
         // allowed frontend origins
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:3000",          // local dev
-                "http://103.132.98.108",     // React dev server on remote
-                "https://ictinnovation.gov.af"    // production domain
+                "http://103.132.98.108:3000",     // React dev server on remote
+                "https://ictinnovation.gov.af:3000"    // production domain
         ));
 
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
