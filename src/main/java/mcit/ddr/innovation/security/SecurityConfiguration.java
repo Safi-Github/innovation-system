@@ -89,25 +89,26 @@ public class SecurityConfiguration {
                 .build();
     }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
+   @Bean
+public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration configuration = new CorsConfiguration();
 
-     // allowed frontend origins including the correct port
+    // allowed frontend origins including production
     configuration.setAllowedOrigins(List.of(
             "http://localhost:3000",          // local dev
             "http://103.132.98.108:3000",     // React dev server on remote
-            "http://ictinnovation.gov.af:3000", // correct production frontend origin
-            "https://ictinnovation.gov.af:3000"      // optional if using HTTPS in prod
+            "http://ictinnovation.gov.af",    // production frontend origin
+            "https://ictinnovation.gov.af"    // optional if using HTTPS in prod
     ));
 
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L); // cache preflight for 1 hour
+    configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+    configuration.setAllowedHeaders(List.of("*"));
+    configuration.setAllowCredentials(true);
+    configuration.setMaxAge(3600L); // cache preflight for 1 hour
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", configuration);
+    return source;
+}
+
 }
