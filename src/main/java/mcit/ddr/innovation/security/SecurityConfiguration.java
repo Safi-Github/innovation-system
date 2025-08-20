@@ -93,12 +93,13 @@ public class SecurityConfiguration {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // allowed frontend origins
-        configuration.setAllowedOrigins(List.of(
-                "http://localhost:3000",          // local dev
-                "http://103.132.98.108:3000",     // React dev server on remote
-                "https://ictinnovation.gov.af"    // production domain
-        ));
+     // allowed frontend origins including the correct port
+    configuration.setAllowedOrigins(List.of(
+            "http://localhost:3000",          // local dev
+            "http://103.132.98.108:3000",     // React dev server on remote
+            "http://ictinnovation.gov.af:3000", // correct production frontend origin
+            "https://ictinnovation.gov.af"      // optional if using HTTPS in prod
+    ));
 
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
