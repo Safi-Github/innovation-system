@@ -66,10 +66,12 @@ public class SecurityConfiguration {
         return httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                // IMPORTANT: Explicitly register your AuthenticationProvider
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(registry -> {
+                    // allow preflight requests
                     registry.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
+
+                    // public endpoints
                     registry.requestMatchers("/home", "/api/register/**", "/api/authenticate").permitAll();
                     registry.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll();
                     registry.requestMatchers("/api/users/**", "/api/account/**").permitAll();
@@ -78,6 +80,8 @@ public class SecurityConfiguration {
                     registry.requestMatchers(HttpMethod.POST, "/api/enums/literacy-levels").permitAll();
                     registry.requestMatchers(HttpMethod.POST, "/api/**").permitAll();
                     registry.requestMatchers("/api/verify-email").permitAll();
+
+                    // everything else requires authentication
                     registry.anyRequest().authenticated();
                 })
                 .formLogin(AbstractHttpConfigurer::disable)
@@ -88,18 +92,21 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
+
+        // allowed frontend origins
         configuration.setAllowedOrigins(List.of(
-                "http://localhost:3000",        // for local development
-                "http://103.132.98.108:3000",     // for production IP
-                "https://ictinnovation.gov.af:3000"  // optional: your domain if using HTTPS
+                "http://localhost:3000",          // local dev
+                "http://103.132.98.108:3000",     // React dev server on remote
+                "https://ictinnovation.gov.af"    // production domain
         ));
+
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L); // cache preflight for 1 hour
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
 }
