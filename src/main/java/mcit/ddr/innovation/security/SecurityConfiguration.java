@@ -69,6 +69,7 @@ public class SecurityConfiguration {
                 // IMPORTANT: Explicitly register your AuthenticationProvider
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(registry -> {
+                    registry.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
                     registry.requestMatchers("/home", "/api/register/**", "/api/authenticate").permitAll();
                     registry.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll();
                     registry.requestMatchers("/api/users/**", "/api/account/**").permitAll();
