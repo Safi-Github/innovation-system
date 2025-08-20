@@ -89,7 +89,7 @@ public class SecurityConfiguration {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:3000",        // for local development
-                "http://10.10.255.63:3000",     // for production IP
+                "http://103.132.98.108:3000",     // for production IP
                 "https://ictinnovation.gov.af:3000"  // optional: your domain if using HTTPS
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
