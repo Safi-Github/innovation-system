@@ -62,33 +62,45 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        return httpSecurity
-                .csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .authenticationProvider(authenticationProvider())
-                .authorizeHttpRequests(registry -> {
-                    // allow preflight requests
-                    registry.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
+public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+    return httpSecurity
+            .csrf(AbstractHttpConfigurer::disable)
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .authenticationProvider(authenticationProvider())
+            .authorizeHttpRequests(registry -> {
+                // allow preflight requests
+                registry.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
 
-                    // public endpoints
-                    registry.requestMatchers("/home", "/api/register/**", "/api/authenticate").permitAll();
-                    registry.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll();
-                    registry.requestMatchers("/api/users/**", "/api/account/**").permitAll();
-                    registry.requestMatchers(HttpMethod.GET, "/api/user/{id}").permitAll();
-                    registry.requestMatchers(HttpMethod.GET, "/api/enums/literacy-levels").permitAll();
-                    registry.requestMatchers(HttpMethod.POST, "/api/enums/literacy-levels").permitAll();
-                    registry.requestMatchers(HttpMethod.POST, "/api/**").permitAll();
-                    registry.requestMatchers("/api/verify-email").permitAll();
+                // public API endpoints
+                registry.requestMatchers("/home", "/api/register/**", "/api/authenticate").permitAll();
+                registry.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll();
+                registry.requestMatchers("/api/users/**", "/api/account/**").permitAll();
+                registry.requestMatchers(HttpMethod.GET, "/api/user/{id}").permitAll();
+                registry.requestMatchers(HttpMethod.GET, "/api/enums/literacy-levels").permitAll();
+                registry.requestMatchers(HttpMethod.POST, "/api/enums/literacy-levels").permitAll();
+                registry.requestMatchers(HttpMethod.POST, "/api/**").permitAll();
+                registry.requestMatchers("/api/verify-email").permitAll();
 
-                    // everything else requires authentication
-                   registry.anyRequest().permitAll();
+                // <<< UPDATED: Allow static resources (frontend) to load
+                registry.requestMatchers(
+                    "/",                // root page
+                    "/index.html",      // index page
+                    "/static/**",       // all frontend static files
+                    "/assets/**",       // optional if you have assets folder
+                    "/favicon.ico"      // favicon
+                ).permitAll();
 
-                })
-                .formLogin(AbstractHttpConfigurer::disable)
-                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
-                .build();
-    }
+                // <<< UPDATED: Protect API endpoints with JWT
+                registry.requestMatchers("/api/**").authenticated();
+
+                // <<< UPDATED: any other requests can be permitted if needed
+                registry.anyRequest().permitAll();
+            })
+            .formLogin(AbstractHttpConfigurer::disable)
+            .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+            .build();
+}
+
 
    @Bean
 public CorsConfigurationSource corsConfigurationSource() {
