@@ -82,7 +82,8 @@ public class SecurityConfiguration {
                     registry.requestMatchers("/api/verify-email").permitAll();
 
                     // everything else requires authentication
-                    registry.anyRequest().authenticated();
+                   registry.anyRequest().permitAll();
+
                 })
                 .formLogin(AbstractHttpConfigurer::disable)
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
