@@ -110,8 +110,7 @@ public CorsConfigurationSource corsConfigurationSource() {
     configuration.setAllowedOrigins(List.of(
             "http://localhost:3000",          // local dev
             "http://103.132.98.108:3000",     // React dev server on remote
-            "http://103.132.98.108",
-            "http://ictinnovation.gov.af",    // production frontend origin
+            "https://103.132.98.108",
             "https://ictinnovation.gov.af"    // optional if using HTTPS in prod
     ));
 
