@@ -62,66 +62,52 @@ public class SecurityConfiguration {
     }
 
     @Bean
-public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-    return httpSecurity
-            .csrf(AbstractHttpConfigurer::disable)
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .authenticationProvider(authenticationProvider())
-            .authorizeHttpRequests(registry -> {
-                // allow preflight requests
-                registry.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+        return httpSecurity
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .authenticationProvider(authenticationProvider())
+                .authorizeHttpRequests(registry -> {
+                    // allow preflight requests
+                    registry.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
 
-                // public API endpoints
-                registry.requestMatchers("/home", "/api/register/**", "/api/authenticate").permitAll();
-                registry.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll();
-                registry.requestMatchers("/api/users/**", "/api/account/**").permitAll();
-                registry.requestMatchers(HttpMethod.GET, "/api/user/{id}").permitAll();
-                registry.requestMatchers(HttpMethod.GET, "/api/enums/literacy-levels").permitAll();
-                registry.requestMatchers(HttpMethod.POST, "/api/enums/literacy-levels").permitAll();
-                registry.requestMatchers(HttpMethod.POST, "/api/**").permitAll();
-                registry.requestMatchers("/api/verify-email").permitAll();
+                    // public API endpoints
+                    registry.requestMatchers("/home", "/api/register/**", "/api/authenticate", "/api/verify-email").permitAll();
+                    registry.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll();
 
-                // <<< UPDATED: Allow static resources (frontend) to load
-                registry.requestMatchers(
-                    "/",                // root page
-                    "/index.html",      // index page
-                    "/static/**",       // all frontend static files
-                    "/assets/**",       // optional if you have assets folder
-                    "/favicon.ico"      // favicon
-                ).permitAll();
+                    // static files (frontend)
+                    registry.requestMatchers(
+                            "/", "/index.html", "/static/**", "/_next/static/**", "/assets/**", "/favicon.ico"
+                    ).permitAll();
 
-                // <<< UPDATED: Protect API endpoints with JWT
-                registry.requestMatchers("/api/**").authenticated();
+                    // all other /api/** endpoints require authentication
+                    registry.requestMatchers("/api/**").authenticated();
 
-                // <<< UPDATED: any other requests can be permitted if needed
-                registry.anyRequest().permitAll();
-            })
-            .formLogin(AbstractHttpConfigurer::disable)
-            .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
-            .build();
-}
+                    // any other requests can be permitted
+                    registry.anyRequest().permitAll();
+                })
+                .formLogin(AbstractHttpConfigurer::disable)
+                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+                .build();
+    }
 
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of(
+                "http://localhost:3000",        // local dev
+                "https://localhost:3000",       // local HTTPS dev
+                "http://103.132.98.108:3000",   // frontend dev over HTTP
+                "https://103.132.98.108",       // frontend prod
+                "https://ictinnovation.gov.af"  // frontend prod domain
+        ));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
 
-   @Bean
-public CorsConfigurationSource corsConfigurationSource() {
-    CorsConfiguration configuration = new CorsConfiguration();
-
-    // allowed frontend origins including production
-    configuration.setAllowedOrigins(List.of(
-            "https://localhost:3000",          // local dev
-            "https://103.132.98.108:3000",     // React dev server on remote
-            "https://103.132.98.108",
-            "https://ictinnovation.gov.af"    // optional if using HTTPS in prod
-    ));
-
-    configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-    configuration.setAllowedHeaders(List.of("*"));
-    configuration.setAllowCredentials(true);
-    configuration.setMaxAge(3600L); // cache preflight for 1 hour
-
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", configuration);
-    return source;
-}
-
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
 }
