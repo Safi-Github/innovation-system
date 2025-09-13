@@ -97,7 +97,7 @@ public class SecurityConfiguration {
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:3000",        // local dev
                 "https://localhost:3000",       // local HTTPS dev
-                "http://103.132.98.108:3000",   // frontend dev over HTTP
+                "https://103.132.98.108:3000",   // frontend dev over HTTP
                 "https://103.132.98.108",       // frontend prod
                 "https://ictinnovation.gov.af"  // frontend prod domain
         ));
