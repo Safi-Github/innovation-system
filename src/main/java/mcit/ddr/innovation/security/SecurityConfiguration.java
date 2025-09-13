@@ -72,7 +72,7 @@ public class SecurityConfiguration {
                     registry.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
 
                     // public API endpoints
-                    registry.requestMatchers("/home", "/api/register/**", "/api/authenticate", "/api/verify-email").permitAll();
+                    registry.requestMatchers("/home", "/api/register/**", "/api/authenticate", "/api/users/forgot-password").permitAll();
                     registry.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll();
 
                     // static files (frontend)
