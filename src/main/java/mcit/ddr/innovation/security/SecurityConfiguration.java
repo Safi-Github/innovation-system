@@ -95,12 +95,16 @@ public class SecurityConfiguration {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(
-                "http://localhost:3000",        // local dev
-                "https://localhost:3000",       // local HTTPS dev
-                "https://103.132.98.108:3000",   // frontend dev over HTTP
-                "https://103.132.98.108",       // frontend prod
-                "https://ictinnovation.gov.af"  // frontend prod domain
-        ));
+    "http://localhost:3000",
+    "https://localhost:3000",
+    "http://103.132.98.108:3000",   // ✅ add http version
+    "https://103.132.98.108:3000",
+    "http://103.132.98.108",        // ✅ also allow plain http
+    "https://103.132.98.108",
+    "http://ictinnovation.gov.af",  // ✅ if frontend is ever served over http
+    "https://ictinnovation.gov.af"
+));
+
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
