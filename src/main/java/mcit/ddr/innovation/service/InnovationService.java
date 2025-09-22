@@ -139,10 +139,16 @@ public class InnovationService {
             {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String email = auth.getName();
-            MyUser loggedInUser = myUserRepository.findByEmail(email)
-                            .orElseThrow(() -> new RuntimeException("User not found: " + email));
+//            MyUser loggedInUser = myUserRepository.findByEmail(email)
+//                            .orElseThrow(() -> new RuntimeException("User not found: " + email));
 
-            CommitteeMember member = committeeMemberRepository
+                // Lookup by username instead of email
+                MyUser loggedInUser = myUserRepository.findByUsernameOrEmail(email, email)
+                        .orElseThrow(() -> new RuntimeException("User not found: " + email));
+
+
+
+                CommitteeMember member = committeeMemberRepository
             .findByCommitteeIdAndUserId(innovation.getCommittee().getId(), loggedInUser.getId())
                     .orElseThrow(() -> new AccessDeniedException("User is not a committee member"));
 
