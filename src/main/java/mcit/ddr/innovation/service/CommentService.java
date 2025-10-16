@@ -64,7 +64,7 @@ public class CommentService {
         comObj.setInnovation(innovation);
         comObj.setUser(loggedInUser);
         comObj.setComment(comment);
-        comObj.setCommentedAt(LocalDate.now());
+        comObj.setCommentedAt(LocalDateTime.now());
 
         commentRepository.save(comObj);
 

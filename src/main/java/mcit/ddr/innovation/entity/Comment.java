@@ -6,6 +6,7 @@ import org.w3c.dom.Text;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "comment")
@@ -20,7 +21,7 @@ public class Comment implements Serializable {
     private String comment;
 
     @Column(name = "created_at", nullable = false)
-    private LocalDate commentedAt;
+    private LocalDateTime commentedAt;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "innovation_id", nullable = false)
