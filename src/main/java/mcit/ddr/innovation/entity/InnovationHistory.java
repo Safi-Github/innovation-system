@@ -3,7 +3,7 @@ package mcit.ddr.innovation.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -18,7 +18,7 @@ public class InnovationHistory {
     private String archivedInnovationData; // Stores JSON of rejected innovation
 
     @Column(name = "date_created")
-    private LocalDate dateCreated;
+    private LocalDateTime dateCreated;
 
     @OneToOne
     @JoinColumn(name = "review_id")
