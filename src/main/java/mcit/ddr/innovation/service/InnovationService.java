@@ -33,6 +33,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
+import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.format.TextStyle;
 import java.util.EnumMap;
@@ -222,7 +223,7 @@ public class InnovationService {
 
                 InnovationHistory innovHistory = new InnovationHistory();
                 innovHistory.setArchivedInnovationData(innovationJson);
-                innovHistory.setDateCreated(LocalDate.now());
+                innovHistory.setDateCreated(LocalDateTime.now());
                 innovHistory.setReview(savedLog);
                 innovHistory.setInnovation(innovation);
                 innovationHistoryRepository.save(innovHistory);

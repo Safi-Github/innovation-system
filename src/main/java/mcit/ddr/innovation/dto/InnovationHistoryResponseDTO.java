@@ -8,6 +8,7 @@ import mcit.ddr.innovation.enums.InnovStatus;
 import mcit.ddr.innovation.entity.InnovationHistory;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -32,7 +33,7 @@ public class InnovationHistoryResponseDTO{
     private String resourcesNeeded;
     private String attachment;
 
-    private LocalDate dateCreated;
+    private LocalDateTime dateCreated;
 
     // optional: you can hide this if you want
     @JsonInclude(JsonInclude.Include.NON_NULL)
