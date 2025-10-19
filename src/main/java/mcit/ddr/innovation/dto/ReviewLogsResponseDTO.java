@@ -9,6 +9,7 @@ import mcit.ddr.innovation.enums.InnovStatus;
 import mcit.ddr.innovation.entity.InnovationHistory;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -22,7 +23,7 @@ public class ReviewLogsResponseDTO{
     private Long id;
     private InnovStatus stateChangedTo;
     private MyUser createdBy;
-    private LocalDate createdDate;
+    private LocalDateTime createdDate;
     private String consideration;
     private Committee AssignedTo;
     @JsonProperty("previous_submission")

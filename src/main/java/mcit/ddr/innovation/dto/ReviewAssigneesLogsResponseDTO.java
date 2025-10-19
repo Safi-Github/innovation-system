@@ -8,8 +8,7 @@ import mcit.ddr.innovation.entity.MyUser;
 import mcit.ddr.innovation.enums.InnovStatus;
 
 import java.time.LocalDate;
-
-
+import java.time.LocalDateTime;
 
 
 @Data
@@ -19,7 +18,7 @@ public class ReviewAssigneesLogsResponseDTO{
     private Long id;
     private InnovStatus stateChangedTo;
     private MyUser createdBy;
-    private LocalDate createdDate;
+    private LocalDateTime createdDate;
     private String consideration;
     private Committee assignedTo;
 }

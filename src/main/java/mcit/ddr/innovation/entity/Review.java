@@ -2,14 +2,17 @@ package mcit.ddr.innovation.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
 import mcit.ddr.innovation.enums.InnovStatus;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
+@Data
 public class Review {
 
     @Id
@@ -23,7 +26,7 @@ public class Review {
     @JoinColumn(name = "created_id")
     private MyUser createdBy;
 
-    private LocalDate createdDate;
+    private LocalDateTime createdDate;
 
     private String consideration;
 
@@ -39,68 +42,68 @@ public class Review {
     @JsonIgnoreProperties("review")
     private InnovationHistory innovationHistory;
 
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public InnovStatus getStateChangedTo() {
-        return stateChangedTo;
-    }
-
-    public void setStateChangedTo(InnovStatus stateChangedTo) {
-        this.stateChangedTo = stateChangedTo;
-    }
-
-    public MyUser getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(MyUser createdBy) {
-        this.createdBy = createdBy;
-    }
-
-    public LocalDate getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(LocalDate createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public String getConsideration() {
-        return consideration;
-    }
-
-    public void setConsideration(String consideration) {
-        this.consideration = consideration;
-    }
-
-    public Committee getAssignedTo() {
-        return assignedTo;
-    }
-    
-    public void setAssignedTo(Committee assignedTo) {
-        this.assignedTo = assignedTo;
-    }
-
-    public Innovation getInnovation() {
-        return innovation;
-    }
-
-    public void setInnovation(Innovation innovation) {
-        this.innovation = innovation;
-    }
-
-    public InnovationHistory getInnovationHistory() {
-        return innovationHistory;
-    }
-    
-    public void setInnovationHistory(InnovationHistory innovationHistory) {
-        this.innovationHistory = innovationHistory;
-    }
+//    // Getters and Setters
+//    public Long getId() {
+//        return id;
+//    }
+//
+//    public void setId(Long id) {
+//        this.id = id;
+//    }
+//
+//    public InnovStatus getStateChangedTo() {
+//        return stateChangedTo;
+//    }
+//
+//    public void setStateChangedTo(InnovStatus stateChangedTo) {
+//        this.stateChangedTo = stateChangedTo;
+//    }
+//
+//    public MyUser getCreatedBy() {
+//        return createdBy;
+//    }
+//
+//    public void setCreatedBy(MyUser createdBy) {
+//        this.createdBy = createdBy;
+//    }
+//
+//    public LocalDate getCreatedDate() {
+//        return createdDate;
+//    }
+//
+//    public void setCreatedDate(LocalDate createdDate) {
+//        this.createdDate = createdDate;
+//    }
+//
+//    public String getConsideration() {
+//        return consideration;
+//    }
+//
+//    public void setConsideration(String consideration) {
+//        this.consideration = consideration;
+//    }
+//
+//    public Committee getAssignedTo() {
+//        return assignedTo;
+//    }
+//
+//    public void setAssignedTo(Committee assignedTo) {
+//        this.assignedTo = assignedTo;
+//    }
+//
+//    public Innovation getInnovation() {
+//        return innovation;
+//    }
+//
+//    public void setInnovation(Innovation innovation) {
+//        this.innovation = innovation;
+//    }
+//
+//    public InnovationHistory getInnovationHistory() {
+//        return innovationHistory;
+//    }
+//
+//    public void setInnovationHistory(InnovationHistory innovationHistory) {
+//        this.innovationHistory = innovationHistory;
+//    }
 }

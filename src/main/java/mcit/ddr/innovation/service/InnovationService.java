@@ -197,7 +197,7 @@ public class InnovationService {
         log.setStateChangedTo(newStatus);
         log.setConsideration(payload.get("consideration"));
         log.setCreatedBy(stateChangedByUser);
-        log.setCreatedDate(LocalDate.now());
+        log.setCreatedDate(LocalDateTime.now());
         log.setInnovation(innovation);
         Review savedLog = reviewRepository.save(log);
 
@@ -263,7 +263,7 @@ public class InnovationService {
                 innovation.getTitle(),
                 innovation.getStatus(),
                 stateChangedByUser,
-                log.getCreatedDate(),
+                log.getCreatedDate().toLocalDate(),
                 log.getConsideration()
         );
     }
@@ -293,7 +293,7 @@ public class InnovationService {
         Review log = new Review();
         log.setStateChangedTo(InnovStatus.valueOf(status.toUpperCase()));
         log.setCreatedBy(assigner);
-        log.setCreatedDate(LocalDate.now());
+        log.setCreatedDate(LocalDateTime.now());
         log.setConsideration(consideration);
         log.setAssignedTo(committee);
         log.setInnovation(innovation);
