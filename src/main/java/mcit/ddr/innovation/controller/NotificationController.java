@@ -32,4 +32,9 @@ public class NotificationController {
         notificationService.markNotificationAsRead(notificationId);
         return ResponseEntity.ok("Notification marked as read");
     }
+    
+    //Test Commit For Solving Git_Problem
+    public ResponseEntity<String> Test(){
+        return ResponseEntity.ok("this is the result");
+    }
 }
