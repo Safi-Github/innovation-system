@@ -36,8 +36,6 @@ import org.springframework.data.domain.Sort;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.format.TextStyle;
-import java.util.EnumMap;
-
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -101,6 +99,15 @@ public class InnovationService {
         }
         if (partialUpdateDTO.getCategory() != null) {
             innovation.setCategory(partialUpdateDTO.getCategory());
+        }
+        if (partialUpdateDTO.getInnovationIntroduciton() != null) {
+            innovation.setInnovationIntroduciton(partialUpdateDTO.getInnovationIntroduciton());
+        }
+        if (partialUpdateDTO.getDigitalRequirements() != null) {
+            innovation.setDigitalRequirements(partialUpdateDTO.getDigitalRequirements());
+        }
+        if (partialUpdateDTO.getInnovationCategory() != null) {
+            innovation.setInnovationCategory(partialUpdateDTO.getInnovationCategory());
         }
         if (partialUpdateDTO.getAdditionalInfo() != null) {
             innovation.setAdditionalInfo(partialUpdateDTO.getAdditionalInfo());

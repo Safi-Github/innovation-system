@@ -41,6 +41,15 @@ public class Innovation {
     @Column(columnDefinition = "TEXT")
     private String additionalInfo;
 
+   @Column(columnDefinition = "TEXT")
+    private String innovationIntroduciton;
+
+    @Column(columnDefinition = "TEXT")
+    private String digitalRequirements;
+
+    @Column(columnDefinition = "TEXT")
+    private String innovationCategory;
+
     @Enumerated(EnumType.STRING)
     private InnovStatus status;
 

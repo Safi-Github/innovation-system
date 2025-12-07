@@ -8,6 +8,7 @@ import java.util.List;
 
 @Data
 public class InnovationResponseDTO {
+
     private Long id;
     private String title;
     private String description;
@@ -21,7 +22,9 @@ public class InnovationResponseDTO {
     private Date assignedDate;
     private String attachment;
     private Date createdDate;
-
+    private String innovationIntroduciton;
+    private String digitalRequirements;
+    private String innovationCategory;
     private Category category;
     private AdminUserDTO assigner;
     private AdminUserDTO createdBy;

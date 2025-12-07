@@ -14,6 +14,10 @@ public class PartialInnovationUpdateDTO {
 
     private String purpose;
 
+    private String innovationIntroduciton;
+    private String digitalRequirements;
+    private String innovationCategory;
+
     private Category category;
 
     private String additionalInfo;
