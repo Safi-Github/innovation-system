@@ -112,6 +112,9 @@ public class UserController {
             .noContent()
             .build();
     }
+
+
+
     // endpoint for getting literacy-levels enum
     @GetMapping("/enums/literacy-levels")
     public ResponseEntity<List<Map<String, String>>> getLiteracyLevels() {
