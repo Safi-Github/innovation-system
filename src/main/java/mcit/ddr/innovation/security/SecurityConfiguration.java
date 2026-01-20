@@ -95,10 +95,10 @@ public class SecurityConfiguration {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(
-    "http://localhost:3000",
-    "https://localhost:3000",
-    "http://103.132.98.108:3000",   // ✅ add http version
-    "https://103.132.98.108:3000",
+    "http://localhost:3030",
+    "https://localhost:3030",
+    "http://103.132.98.108:3030",   // ✅ add http version
+    "https://103.132.98.108:3030",
     "http://103.132.98.108",        // ✅ also allow plain http
     "https://103.132.98.108",
     "http://ictinnovation.gov.af",  // ✅ if frontend is ever served over http
