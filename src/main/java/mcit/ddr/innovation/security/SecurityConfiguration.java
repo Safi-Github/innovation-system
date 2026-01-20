@@ -100,9 +100,9 @@ public class SecurityConfiguration {
     "http://103.132.98.108:3030",   // ✅ add http version
     "https://103.132.98.108:3030",
     "http://103.132.98.108",        // ✅ also allow plain http
-    "https://103.132.98.108",
     "http://ictinnovation.gov.af",  // ✅ if frontend is ever served over http
-    "https://ictinnovation.gov.af"
+    "https://ictinnovation.gov.af",
+    "https://ictinnovation.gov.af:543"
 ));
 
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
