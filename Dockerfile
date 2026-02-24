@@ -1,13 +1,13 @@
 FROM eclipse-temurin:21-jdk-jammy
 
-# Set the working directory
 WORKDIR /app
 
-# Copy the already-built Spring Boot jar
+# Copy jar
 COPY target/innovation-0.0.1-SNAPSHOT.jar app.jar
 
-# Expose the port
+# Copy SSL folder
+COPY ssl /ssl
+
 EXPOSE 7080
 
-# Run the Spring Boot application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar", "--spring.config.location=classpath:/,file:/app/application-docker.properties"]
