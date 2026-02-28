@@ -97,9 +97,9 @@ public class SecurityConfiguration {
         configuration.setAllowedOrigins(List.of(
     "http://localhost:3030",
     "https://localhost:3030",
-    "http://103.132.98.108:3030",   // ✅ add http version
-    "https://103.132.98.108:3030",
-    "http://103.132.98.108",        // ✅ also allow plain http
+    "http://103.132.98.174:3030",   // ✅ add http version
+    "https://103.132.98.174:3030",
+    "http://103.132.98.174",        // ✅ also allow plain http
     "http://ictinnovation.gov.af",  // ✅ if frontend is ever served over http
     "https://ictinnovation.gov.af",
     "https://ictinnovation.gov.af:543"
