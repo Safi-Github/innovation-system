@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -48,9 +49,14 @@ public class SecurityConfiguration {
     }
 
     @Bean
+    public UserDetailsService userDetailsService() {
+        return userDetailService;
+    }
+
+    @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailService); // Use the private field directly
+        provider.setUserDetailsService(userDetailService);
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
     }
@@ -62,30 +68,22 @@ public class SecurityConfiguration {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(registry -> {
-                    // Allow preflight requests
+                    // allow preflight requests
                     registry.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
 
-                    // Public API endpoints
-                    registry.requestMatchers(
-                            "/home",
-                            "/api/register/**",
-                            "/api/authenticate",
-                            "/api/users/forgot-password",
-                            "/api/users/validate-otp-code",
-                            "/api/users/reset-password",
-                            "/api/users"
-                    ).permitAll();
+                    // public API endpoints
+                    registry.requestMatchers("/home", "/api/register/**", "/api/authenticate", "/api/users/forgot-password", "/api/users/validate-otp-code", "/api/users/reset-password", "/api/users").permitAll();
                     registry.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll();
 
-                    // Static frontend files
+                    // static files (frontend)
                     registry.requestMatchers(
                             "/", "/index.html", "/static/**", "/_next/static/**", "/assets/**", "/favicon.ico"
                     ).permitAll();
 
-                    // All other /api/** endpoints require authentication
+                    // all other /api/** endpoints require authentication
                     registry.requestMatchers("/api/**").authenticated();
 
-                    // Any other requests are permitted
+                    // any other requests can be permitted
                     registry.anyRequest().permitAll();
                 })
                 .formLogin(AbstractHttpConfigurer::disable)
@@ -97,14 +95,15 @@ public class SecurityConfiguration {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(
-                "http://localhost:3030",
-                "https://localhost:3030",
-                "http://103.132.98.174:3030",
-                "https://103.132.98.174:3030",
-                "http://103.132.98.174",
-                "http://ictinnovation.gov.af",
-                "https://ictinnovation.gov.af"
-        ));
+    "http://localhost:3030",
+    "https://localhost:3030",
+    "http://103.132.98.174:3030",   // ✅ add http version
+    "https://103.132.98.174:3030",
+    "http://103.132.98.174",        // ✅ also allow plain http
+    "http://ictinnovation.gov.af",  // ✅ if frontend is ever served over http
+    "https://ictinnovation.gov.af"
+));
+
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
@@ -115,3 +114,5 @@ public class SecurityConfiguration {
         return source;
     }
 }
+
+
