@@ -48,10 +48,10 @@ public class SecurityConfiguration {
         return config.getAuthenticationManager();
     }
 
-    @Bean
-    public UserDetailsService userDetailsService() {
-        return userDetailService;
-    }
+    // @Bean
+    // public UserDetailsService userDetailsService() {
+    //     return userDetailService;
+    // }
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
